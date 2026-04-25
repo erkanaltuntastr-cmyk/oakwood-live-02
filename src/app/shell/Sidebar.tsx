@@ -5,6 +5,7 @@ import {
   Users, Settings, LogOut, ChevronRight,
 } from 'lucide-react'
 import { useAppStore } from '@/state/store'
+import { Avatar } from '@/components/Avatar'
 import { cn } from '@/lib/utils'
 
 const parentNav = [
@@ -50,7 +51,7 @@ export function Sidebar() {
       {/* Active profile */}
       {profile && (
         <div className="flex items-center gap-3 px-5 py-3.5 border-b border-border">
-          <span className="text-2xl">{profile.avatar}</span>
+          <Avatar profile={profile} size="sm" />
           <div className="min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">{profile.name}</p>
             <p className="text-xs text-muted-foreground">{isParent ? 'Veli' : 'Çocuk'}</p>
@@ -67,7 +68,7 @@ export function Sidebar() {
           <div className="flex items-center gap-2.5">
             {activeChild ? (
               <>
-                <span className="text-lg">{activeChild.avatar}</span>
+                <Avatar profile={activeChild} size="sm" />
                 <div className="text-left">
                   <p className="text-xs font-semibold text-foreground leading-none">{activeChild.name}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">Seçili çocuk</p>

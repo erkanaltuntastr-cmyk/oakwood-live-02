@@ -6,6 +6,7 @@ import { AiPanel } from './AiPanel'
 import { CommandPalette } from '@/features/command/CommandPalette'
 import { Dashboard } from '@/features/dashboard/Dashboard'
 import { ChildrenHub } from '@/features/children/ChildrenHub'
+import { Settings } from '@/features/settings/Settings'
 import { QuizWizard } from '@/features/quiz/QuizWizard'
 import { QuizSession } from '@/features/quiz/QuizSession'
 import { QuizResult } from '@/features/quiz/QuizResult'
@@ -42,7 +43,7 @@ export function AppShell() {
             <Route path="homework"   element={<Placeholder title="Ödevler" />} />
             <Route path="reports"    element={<Placeholder title="Raporlar" />} />
             <Route path="messages"   element={<Placeholder title="Mesajlar" />} />
-            <Route path="settings"   element={<Placeholder title="Ayarlar" />} />
+            <Route path="settings"   element={<Settings />} />
             <Route path="*"          element={<Dashboard />} />
           </Routes>
         </main>

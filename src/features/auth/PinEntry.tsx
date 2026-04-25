@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAppStore } from '@/state/store'
+import { Avatar } from '@/components/Avatar'
 import { cn } from '@/lib/utils'
 import { ArrowLeft, Delete } from 'lucide-react'
 
@@ -20,22 +21,14 @@ export function PinEntry() {
   const [shake, setShake] = useState(false)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  useEffect(() => {
-    if (!profile) navigate('/')
-  }, [profile, navigate])
+  useEffect(() => { if (!profile) navigate('/') }, [profile, navigate])
 
   useEffect(() => {
     if (lockedUntil) {
       intervalRef.current = setInterval(() => {
         const left = Math.ceil((lockedUntil - Date.now()) / 1000)
-        if (left <= 0) {
-          setLockedUntil(null)
-          setAttempts(0)
-          setRemaining(0)
-          clearInterval(intervalRef.current!)
-        } else {
-          setRemaining(left)
-        }
+        if (left <= 0) { setLockedUntil(null); setAttempts(0); setRemaining(0); clearInterval(intervalRef.current!) }
+        else setRemaining(left)
       }, 500)
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
@@ -50,23 +43,18 @@ export function PinEntry() {
     if (next.length === 4) verify(next)
   }
 
-  function handleDelete() {
-    setPin((p) => p.slice(0, -1))
-  }
+  function handleDelete() { setPin((p) => p.slice(0, -1)) }
 
   function verify(value: string) {
     if (value === profile!.pinHash) {
       setActiveProfile(profile!.id)
       navigate('/app/dashboard')
     } else {
-      const nextAttempts = attempts + 1
-      setAttempts(nextAttempts)
+      const next = attempts + 1
+      setAttempts(next)
       setShake(true)
       setTimeout(() => { setShake(false); setPin('') }, 500)
-      if (nextAttempts >= MAX_ATTEMPTS) {
-        setLockedUntil(Date.now() + LOCKOUT_SECONDS * 1000)
-        setRemaining(LOCKOUT_SECONDS)
-      }
+      if (next >= MAX_ATTEMPTS) { setLockedUntil(Date.now() + LOCKOUT_SECONDS * 1000); setRemaining(LOCKOUT_SECONDS) }
     }
   }
 
@@ -76,62 +64,39 @@ export function PinEntry() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8">
-      <button
-        onClick={() => navigate('/')}
-        className="absolute top-6 left-6 text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2 text-sm"
-      >
+      <button onClick={() => navigate('/')} className="absolute top-6 left-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
         <ArrowLeft className="w-4 h-4" /> Geri
       </button>
 
       <div className="flex flex-col items-center gap-8 w-full max-w-xs">
-        <div className="text-center">
-          <div className="text-5xl mb-3">{profile.avatar}</div>
-          <p className="font-semibold text-lg text-foreground">{profile.name}</p>
-          <p className="text-sm text-muted-foreground mt-1">PIN'ini gir</p>
+        <div className="text-center flex flex-col items-center gap-3">
+          <Avatar profile={profile} size="xl" />
+          <div>
+            <p className="font-semibold text-lg text-foreground">{profile.name}</p>
+            <p className="text-sm text-muted-foreground mt-0.5">PIN'ini gir</p>
+          </div>
         </div>
 
-        {/* PIN dots */}
         <div className={cn('flex gap-4', shake && 'animate-bounce')}>
           {dots.map((filled, i) => (
-            <div
-              key={i}
-              className={cn(
-                'w-4 h-4 rounded-full border-2 transition-all duration-150',
-                filled
-                  ? 'bg-foreground border-foreground scale-110'
-                  : 'border-muted-foreground'
-              )}
-            />
+            <div key={i} className={cn(
+              'w-4 h-4 rounded-full border-2 transition-all duration-150',
+              filled ? 'bg-primary border-primary scale-110' : 'border-muted-foreground'
+            )} />
           ))}
         </div>
 
-        {isLocked && (
-          <p className="text-destructive text-sm text-center">
-            Çok fazla yanlış deneme. {remaining}s bekle.
-          </p>
-        )}
-
+        {isLocked && <p className="text-destructive text-sm text-center">Çok fazla yanlış deneme. {remaining}s bekle.</p>}
         {!isLocked && attempts > 0 && attempts < MAX_ATTEMPTS && (
-          <p className="text-destructive text-sm text-center">
-            Yanlış PIN. {MAX_ATTEMPTS - attempts} hakkın kaldı.
-          </p>
+          <p className="text-destructive text-sm text-center">Yanlış PIN. {MAX_ATTEMPTS - attempts} hakkın kaldı.</p>
         )}
 
-        {/* Keypad */}
         <div className="grid grid-cols-3 gap-3 w-full">
           {['1','2','3','4','5','6','7','8','9','','0','⌫'].map((key, i) => {
             if (key === '') return <div key={i} />
             return (
-              <button
-                key={key}
-                onClick={() => key === '⌫' ? handleDelete() : handleDigit(key)}
-                disabled={isLocked}
-                className={cn(
-                  'h-14 rounded-xl text-xl font-medium transition-all',
-                  'bg-secondary hover:bg-secondary/70 active:scale-95',
-                  'disabled:opacity-30 disabled:cursor-not-allowed',
-                  key === '⌫' && 'flex items-center justify-center'
-                )}
+              <button key={key} onClick={() => key === '⌫' ? handleDelete() : handleDigit(key)} disabled={isLocked}
+                className={cn('h-14 rounded-xl text-xl font-medium transition-all bg-card border border-border hover:bg-muted active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed', key === '⌫' && 'flex items-center justify-center')}
               >
                 {key === '⌫' ? <Delete className="w-5 h-5" /> : key}
               </button>

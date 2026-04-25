@@ -5,13 +5,29 @@ export type SessionStatus = 'pending' | 'in_progress' | 'completed' | 'abandoned
 
 export interface Profile {
   id: string
-  name: string
   role: Role
-  avatar: string
+  // display
+  name: string
+  surname?: string
+  initials?: string       // auto-computed if not set
+  color?: string          // avatar bg color (tailwind class)
+  // auth
   pinHash: string
-  childIds?: string[]       // parents only
-  yearGroup?: string        // children only
+  // parent-specific
+  childIds?: string[]
+  familyName?: string
+  postcode?: string
+  email?: string
+  // child-specific
+  yearGroup?: string
+  school?: string
+  dob?: string            // DD/MM/YYYY
+  notes?: string
+  hobbies?: string[]
+  subjects?: { name: string; active: boolean }[]
+  // meta
   createdAt: string
+  isDemo?: boolean
 }
 
 export interface Question {
@@ -19,7 +35,7 @@ export interface Question {
   type: QuestionType
   topic: string
   prompt: string
-  options?: string[]        // multiple-choice only
+  options?: string[]
   answer: string
   hint?: string
   explanation?: string
@@ -28,11 +44,11 @@ export interface Question {
 
 export interface QuizConfig {
   totalQuestions: number
-  optionsCount: number      // 2-4 for MC
+  optionsCount: number
   difficulty: Difficulty | 'Mixed'
   showHint: boolean
   showExplanation: boolean
-  timeLimit: number         // minutes, 0 = no limit
+  timeLimit: number
   counts: {
     multipleChoice: number
     gapFill: number
@@ -47,7 +63,7 @@ export interface QuizDraft {
   topics: string[]
   config: QuizConfig
   createdAt: string
-  createdBy: string         // parent profile id
+  createdBy: string
 }
 
 export interface Answer {
