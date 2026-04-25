@@ -154,6 +154,6 @@ export const useAppStore = create<AppState>()(
           ),
         })),
     }),
-    { name: 'oakwood-store' }
+    { name: 'oakwood-v2' }
   )
 )

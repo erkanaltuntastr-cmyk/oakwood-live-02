@@ -24,6 +24,7 @@ export function QuizSession() {
   const [showExplanation, setShowExplanation] = useState(false)
   const [answered, setAnswered] = useState(false)
   const [elapsed, setElapsed] = useState(0)
+  const timeLimitSec = (session?.config.timeLimit ?? 0) * 60
 
   // Mark started
   useEffect(() => {
@@ -32,11 +33,19 @@ export function QuizSession() {
     }
   }, [session?.id])
 
-  // Timer
+  // Timer — counts up; if timeLimit set, auto-submit when reached
   useEffect(() => {
-    const t = setInterval(() => setElapsed((e) => e + 1), 1000)
+    const t = setInterval(() => {
+      setElapsed((e) => {
+        const next = e + 1
+        if (timeLimitSec > 0 && next >= timeLimitSec) {
+          clearInterval(t)
+        }
+        return next
+      })
+    }, 1000)
     return () => clearInterval(t)
-  }, [])
+  }, [timeLimitSec])
 
   const handleNext = useCallback(() => {
     if (!session) return
@@ -83,6 +92,10 @@ export function QuizSession() {
     )
   }
 
+  const timeDisplay = timeLimitSec > 0
+    ? formatTime(Math.max(0, timeLimitSec - elapsed))
+    : formatTime(elapsed)
+
   const question = session.questions[currentQ]
   const isGap = question.type === 'gap-fill'
   const isOpen = question.type === 'open-ended'
@@ -98,7 +111,7 @@ export function QuizSession() {
             <p className="text-xs text-muted-foreground uppercase tracking-wider">{session.subject}</p>
             <h1 className="text-lg font-display font-semibold text-foreground">{question.topic}</h1>
           </div>
-          <span className="font-mono text-sm bg-muted px-3 py-1 rounded-lg">{formatTime(elapsed)}</span>
+          <span className="font-mono text-sm bg-muted px-3 py-1 rounded-lg">{timeDisplay}</span>
         </div>
 
         {/* Progress */}
@@ -154,7 +167,7 @@ export function QuizSession() {
       title={`${session.subject} — ${question.topic}`}
       currentQ={currentQ + 1}
       totalQ={session.questions.length}
-      timeLeft={formatTime(elapsed)}
+      timeLeft={timeDisplay}
       question={question.prompt}
       options={question.options ?? []}
       selectedOption={selected}

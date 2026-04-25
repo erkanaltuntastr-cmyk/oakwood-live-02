@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { QuizResultShell } from './QuizResultShell'
 import { useAppStore } from '@/state/store'
@@ -26,13 +26,15 @@ export function QuizResult() {
   const score = session.score ?? 0
   const report = session.report ?? buildReport(score)
 
-  // Auto-generate homework on first render
-  useState(() => {
-    if (session.status === 'completed') {
+  // Auto-generate homework once per session
+  const seeded = useRef(false)
+  useEffect(() => {
+    if (!seeded.current && session.status === 'completed') {
+      seeded.current = true
       const items = generateHomeworkFromSession(session)
       if (items.length) addHomework(items)
     }
-  })
+  }, [session.id])
 
   const correct = session.questions
     .filter((_, i) => session.answers[i]?.correct)
