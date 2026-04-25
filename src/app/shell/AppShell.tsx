@@ -7,6 +7,8 @@ import { CommandPalette } from '@/features/command/CommandPalette'
 import { Dashboard } from '@/features/dashboard/Dashboard'
 import { ChildrenHub } from '@/features/children/ChildrenHub'
 import { Settings } from '@/features/settings/Settings'
+import { Homework } from '@/features/homework/Homework'
+import { Subjects } from '@/features/subjects/Subjects'
 import { QuizWizard } from '@/features/quiz/QuizWizard'
 import { QuizSession } from '@/features/quiz/QuizSession'
 import { QuizResult } from '@/features/quiz/QuizResult'
@@ -39,8 +41,8 @@ export function AppShell() {
             <Route path="quizzes/new"            element={<QuizWizard />} />
             <Route path="quiz/session/:sessionId" element={<QuizSession />} />
             <Route path="quiz/result/:sessionId"  element={<QuizResult />} />
-            <Route path="subjects"   element={<Placeholder title="Dersler" />} />
-            <Route path="homework"   element={<Placeholder title="Ödevler" />} />
+            <Route path="subjects"   element={<Subjects />} />
+            <Route path="homework"   element={<Homework />} />
             <Route path="reports"    element={<Placeholder title="Raporlar" />} />
             <Route path="messages"   element={<Placeholder title="Mesajlar" />} />
             <Route path="settings"   element={<Settings />} />

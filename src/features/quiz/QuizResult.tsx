@@ -4,11 +4,12 @@ import { QuizResultShell } from './QuizResultShell'
 import { useAppStore } from '@/state/store'
 import { buildReport, createSession } from '@/lib/quizService'
 import { callAI, quizFeedbackPrompt, buildFeedbackMessage } from '@/lib/aiService'
+import { generateHomeworkFromSession } from '@/lib/homeworkService'
 
 export function QuizResult() {
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
-  const { quizSessions, addQuizSession, updateQuizSession } = useAppStore()
+  const { quizSessions, addQuizSession, updateQuizSession, addHomework } = useAppStore()
 
   const session = quizSessions.find((s) => s.id === sessionId)
   const [aiLoading, setAiLoading] = useState(false)
@@ -24,6 +25,14 @@ export function QuizResult() {
 
   const score = session.score ?? 0
   const report = session.report ?? buildReport(score)
+
+  // Auto-generate homework on first render
+  useState(() => {
+    if (session.status === 'completed') {
+      const items = generateHomeworkFromSession(session)
+      if (items.length) addHomework(items)
+    }
+  })
 
   const correct = session.questions
     .filter((_, i) => session.answers[i]?.correct)

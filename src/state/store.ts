@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Profile, QuizDraft, QuizSession } from '@/types'
+import type { HomeworkItem } from '@/lib/homeworkService'
 export type { Profile }
 
 interface AppState {
@@ -9,15 +10,18 @@ interface AppState {
   activeChildId: string | null
   quizDrafts: QuizDraft[]
   quizSessions: QuizSession[]
+  homework: HomeworkItem[]
 
-  setActiveProfile: (id: string | null) => void
-  setActiveChild:   (id: string | null) => void
-  addProfile:       (profile: Profile) => void
-  updateProfile:    (id: string, updates: Partial<Profile>) => void
-  deleteProfile:    (id: string) => void
-  addQuizDraft:     (draft: QuizDraft) => void
-  addQuizSession:   (session: QuizSession) => void
-  updateQuizSession:(id: string, updates: Partial<QuizSession>) => void
+  setActiveProfile:    (id: string | null) => void
+  setActiveChild:      (id: string | null) => void
+  addProfile:          (profile: Profile) => void
+  updateProfile:       (id: string, updates: Partial<Profile>) => void
+  deleteProfile:       (id: string) => void
+  addQuizDraft:        (draft: QuizDraft) => void
+  addQuizSession:      (session: QuizSession) => void
+  updateQuizSession:   (id: string, updates: Partial<QuizSession>) => void
+  addHomework:         (items: HomeworkItem[]) => void
+  completeHomework:    (id: string) => void
 }
 
 // Demo data sourced from live/src/usecases/demoSeed.js
@@ -102,6 +106,7 @@ export const useAppStore = create<AppState>()(
       activeChildId: null,
       quizDrafts: [],
       quizSessions: [],
+      homework: [],
 
       setActiveProfile: (id) => set({ activeProfileId: id, activeChildId: null }),
       setActiveChild:   (id) => set({ activeChildId: id }),
@@ -136,6 +141,16 @@ export const useAppStore = create<AppState>()(
         set((s) => ({
           quizSessions: s.quizSessions.map((sess) =>
             sess.id === id ? { ...sess, ...updates } : sess
+          ),
+        })),
+
+      addHomework: (items) =>
+        set((s) => ({ homework: [...s.homework, ...items] })),
+
+      completeHomework: (id) =>
+        set((s) => ({
+          homework: s.homework.map((h) =>
+            h.id === id ? { ...h, status: 'completed', completedAt: new Date().toISOString() } : h
           ),
         })),
     }),

@@ -76,7 +76,7 @@
   /* Primary button */
   .oak-btn-primary {
     @apply bg-primary text-primary-foreground px-4 py-2.5 rounded-xl font-medium text-sm
-           hover:bg-oak-green-hover transition-colors;
+           hover:opacity-90 transition-colors;
   }
 
   /* Ghost button */

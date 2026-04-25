@@ -79,7 +79,7 @@ export function AiPanel({ onClose }: AiPanelProps) {
           />
           <button
             onClick={() => send(input)}
-            className="w-9 h-9 flex items-center justify-center bg-primary text-primary-foreground rounded-xl hover:bg-oak-green-hover transition-colors shrink-0"
+            className="w-9 h-9 flex items-center justify-center bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-colors shrink-0"
           >
             <Send className="w-3.5 h-3.5" />
           </button>
