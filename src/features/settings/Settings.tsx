@@ -322,10 +322,75 @@ function AddChildForm({ parentId, onDone }: { parentId: string; onDone: () => vo
   )
 }
 
+// ── Add parent inline form ─────────────────────────────────────────────────
+function AddParentForm({ onDone }: { onDone: () => void }) {
+  const { addProfile } = useAppStore()
+  const [form, setForm] = useState({ name: '', surname: '', email: '', pin: '', pinConfirm: '' })
+  const [error, setError] = useState('')
+
+  function save() {
+    if (!form.name.trim()) { setError('Ad zorunlu'); return }
+    if (form.pin.length !== 4) { setError('PIN 4 haneli olmalı'); return }
+    if (form.pin !== form.pinConfirm) { setError("PIN'ler eşleşmiyor"); return }
+    const id = globalThis.crypto.randomUUID()
+    const initials = [form.name[0], form.surname?.[0]].filter(Boolean).join('').toUpperCase()
+    addProfile({
+      id,
+      role: 'parent',
+      name: form.name.trim(),
+      surname: form.surname.trim() || undefined,
+      email: form.email.trim() || undefined,
+      initials,
+      color: getColor(id),
+      pinHash: form.pin,
+      childIds: [],
+      createdAt: new Date().toISOString(),
+    })
+    onDone()
+  }
+
+  return (
+    <div className="oak-card p-5 border-dashed">
+      <p className="text-sm font-semibold text-foreground mb-4">Yeni Veli</p>
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Ad *</label>
+            <input className={inp} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Soyad</label>
+            <input className={inp} value={form.surname} onChange={(e) => setForm({ ...form, surname: e.target.value })} />
+          </div>
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">E-posta</label>
+          <input className={inp} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">PIN *</label>
+          <div className="grid grid-cols-2 gap-3">
+            <input className={inp} type="password" inputMode="numeric" maxLength={4} placeholder="4 haneli PIN" value={form.pin} onChange={(e) => setForm({ ...form, pin: e.target.value.replace(/\D/g,'').slice(0,4) })} />
+            <input className={inp} type="password" inputMode="numeric" maxLength={4} placeholder="Tekrar" value={form.pinConfirm} onChange={(e) => setForm({ ...form, pinConfirm: e.target.value.replace(/\D/g,'').slice(0,4) })} />
+          </div>
+        </div>
+        {error && <p className="text-destructive text-xs">{error}</p>}
+        <div className="flex gap-2 pt-1">
+          <button onClick={onDone} className="flex-1 oak-btn-ghost text-sm py-2">İptal</button>
+          <button onClick={save} className="flex-1 oak-btn-primary text-sm py-2 flex items-center justify-center gap-1.5">
+            <Plus className="w-3.5 h-3.5" /> Ekle
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Settings page ──────────────────────────────────────────────────────────
 export function Settings() {
   const { profiles, activeProfileId } = useAppStore()
   const [addingChild, setAddingChild] = useState(false)
+  const [addingParent, setAddingParent] = useState(false)
 
   const activeProfile = profiles.find((p) => p.id === activeProfileId)
   const isParent = activeProfile?.role === 'parent'
@@ -337,14 +402,23 @@ export function Settings() {
   return (
     <div className="max-w-2xl space-y-10">
       <div>
-        <h1 className="text-2xl font-display font-semibold text-foreground">Ayarlar</h1>
+        <h1 className="text-2xl font-display font-semibold italic text-foreground">Ayarlar</h1>
         <p className="text-muted-foreground text-sm mt-1">Profilleri düzenle, PIN'leri güncelle.</p>
       </div>
 
       {/* Parents section */}
       <section className="space-y-4">
-        <h2 className="text-base font-semibold text-foreground">Veliler</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-foreground">Veliler</h2>
+          {!addingParent && (
+            <button onClick={() => setAddingParent(true)}
+              className="flex items-center gap-1.5 text-sm text-primary hover:opacity-80 font-medium transition-opacity">
+              <Plus className="w-4 h-4" /> Veli Ekle
+            </button>
+          )}
+        </div>
         {parents.map((p) => <ParentCard key={p.id} profile={p} />)}
+        {addingParent && <AddParentForm onDone={() => setAddingParent(false)} />}
       </section>
 
       {/* Children section — only visible to parents */}
@@ -354,7 +428,7 @@ export function Settings() {
             <h2 className="text-base font-semibold text-foreground">Çocuklar</h2>
             {!addingChild && (
               <button onClick={() => setAddingChild(true)}
-                className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 font-medium transition-colors">
+                className="flex items-center gap-1.5 text-sm text-primary hover:opacity-80 font-medium transition-opacity">
                 <Plus className="w-4 h-4" /> Çocuk Ekle
               </button>
             )}

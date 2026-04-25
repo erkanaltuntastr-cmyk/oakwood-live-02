@@ -9,18 +9,12 @@ import { ChildrenHub } from '@/features/children/ChildrenHub'
 import { Settings } from '@/features/settings/Settings'
 import { Homework } from '@/features/homework/Homework'
 import { Subjects } from '@/features/subjects/Subjects'
+import { Reports } from '@/features/reports/Reports'
+import { Messages } from '@/features/messages/Messages'
 import { QuizWizard } from '@/features/quiz/QuizWizard'
 import { QuizSession } from '@/features/quiz/QuizSession'
 import { QuizResult } from '@/features/quiz/QuizResult'
 
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center h-64 gap-3 text-muted-foreground">
-      <p className="text-lg font-display italic">{title}</p>
-      <p className="text-sm">Bu ekran yakında gelecek.</p>
-    </div>
-  )
-}
 
 export function AppShell() {
   const [cmdOpen, setCmdOpen] = useState(false)
@@ -43,8 +37,8 @@ export function AppShell() {
             <Route path="quiz/result/:sessionId"  element={<QuizResult />} />
             <Route path="subjects"   element={<Subjects />} />
             <Route path="homework"   element={<Homework />} />
-            <Route path="reports"    element={<Placeholder title="Raporlar" />} />
-            <Route path="messages"   element={<Placeholder title="Mesajlar" />} />
+            <Route path="reports"    element={<Reports />} />
+            <Route path="messages"   element={<Messages />} />
             <Route path="settings"   element={<Settings />} />
             <Route path="*"          element={<Dashboard />} />
           </Routes>
