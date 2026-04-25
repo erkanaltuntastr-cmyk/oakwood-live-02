@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import type { Report } from '@/types'
 
 interface QuizResultShellProps {
   score: number
@@ -8,9 +9,11 @@ interface QuizResultShellProps {
   onRetry: () => void
   onAiSuggest: () => void
   aiLoading: boolean
+  aiText?: string | null
+  report?: Report
 }
 
-export function QuizResultShell({ score, correct, wrong, onRetry, onAiSuggest, aiLoading }: QuizResultShellProps) {
+export function QuizResultShell({ score, correct, wrong, onRetry, onAiSuggest, aiLoading, aiText, report }: QuizResultShellProps) {
   const color = score >= 80 ? 'text-green-600' : score >= 60 ? 'text-amber-500' : 'text-red-500'
   const ring = score >= 80 ? 'border-green-400' : score >= 60 ? 'border-amber-400' : 'border-red-400'
 
@@ -55,34 +58,41 @@ export function QuizResultShell({ score, correct, wrong, onRetry, onAiSuggest, a
             </div>
           </div>
 
+          {/* Report notes */}
+          {report && (
+            <div className="oak-card p-4 space-y-2 text-sm">
+              {report.strengths.map((s) => <p key={s} className="text-green-700">✓ {s}</p>)}
+              {report.critical.map((s) => <p key={s} className="text-amber-700">⚠ {s}</p>)}
+            </div>
+          )}
+
           {/* Buttons */}
           <div className="flex gap-3">
-            <button
-              onClick={onRetry}
-              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-            >
+            <button onClick={onRetry} className="flex-1 oak-btn-ghost">
               Tekrar Dene
             </button>
             <button
               onClick={onAiSuggest}
-              disabled={aiLoading}
-              className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
+              disabled={aiLoading || !!aiText}
+              className="flex-1 oak-btn-primary disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {aiLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-              AI Önerisi Al
+              {aiText ? 'Öneri Alındı' : 'AI Önerisi Al'}
             </button>
           </div>
         </div>
 
         {/* Right: AI panel */}
-        <div className="w-64 shrink-0 rounded-xl border border-gray-200 bg-white p-4 flex flex-col">
-          <p className="text-sm font-semibold text-gray-700 mb-3">AI Önerisi</p>
+        <div className="w-64 shrink-0 oak-card p-4 flex flex-col">
+          <p className="text-sm font-display font-semibold text-foreground mb-3 italic">AI Önerisi</p>
           {aiLoading ? (
             <div className="flex-1 flex items-center justify-center">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
             </div>
+          ) : aiText ? (
+            <p className="text-sm text-foreground leading-relaxed">{aiText}</p>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-sm text-gray-400 text-center">
+            <div className="flex-1 flex items-center justify-center text-xs text-muted-foreground text-center px-2">
               "AI Önerisi Al" butonuna bas
             </div>
           )}

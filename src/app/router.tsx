@@ -19,7 +19,7 @@ function RegisterParent() {
   return (
     <ParentRegisterForm
       onSubmit={(data) => {
-        addProfile({ id: crypto.uuid(), role: 'parent', ...data })
+        addProfile({ id: crypto.uuid(), role: 'parent', createdAt: new Date().toISOString(), ...data })
         navigate('/')
       }}
       onCancel={() => navigate('/')}
@@ -36,7 +36,7 @@ function RegisterChild() {
     <ChildRegisterForm
       onSubmit={(data) => {
         const childId = crypto.uuid()
-        addProfile({ id: childId, role: 'child', ...data })
+        addProfile({ id: childId, role: 'child', createdAt: new Date().toISOString(), ...data })
         // link child to parent
         if (parent) {
           addProfile({ ...parent, childIds: [...(parent.childIds ?? []), childId] })

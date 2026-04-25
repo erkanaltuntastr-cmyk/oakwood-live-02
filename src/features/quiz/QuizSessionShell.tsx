@@ -11,6 +11,8 @@ interface QuizSessionShellProps {
   onSelect: (i: number) => void
   onHint: () => void
   onNext: () => void
+  hint?: string
+  explanation?: string
 }
 
 const LABELS = ['A', 'B', 'C', 'D']
@@ -18,7 +20,7 @@ const LABELS = ['A', 'B', 'C', 'D']
 export function QuizSessionShell({
   title, currentQ, totalQ, timeLeft,
   question, options, selectedOption,
-  onSelect, onHint, onNext,
+  onSelect, onHint, onNext, hint, explanation,
 }: QuizSessionShellProps) {
   const progress = (currentQ / totalQ) * 100
 
@@ -75,18 +77,30 @@ export function QuizSessionShell({
         ))}
       </div>
 
+      {/* Hint / Explanation */}
+      {hint && (
+        <div className="text-sm bg-accent/40 border border-border rounded-xl px-4 py-3 text-muted-foreground">
+          💡 {hint}
+        </div>
+      )}
+      {explanation && (
+        <div className="text-sm bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-green-800">
+          ✅ {explanation}
+        </div>
+      )}
+
       {/* Bottom actions */}
       <div className="flex justify-between">
         <button
           onClick={onHint}
-          className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+          className="oak-btn-ghost"
         >
           İpucu
         </button>
         <button
           onClick={onNext}
           disabled={selectedOption === null}
-          className="px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="oak-btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {currentQ === totalQ ? 'Bitir' : 'Sonraki'}
         </button>
