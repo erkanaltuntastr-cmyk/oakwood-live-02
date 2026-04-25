@@ -125,23 +125,30 @@ function StepSettings({ config, setConfig }: { config: QuizConfig; setConfig: (c
         ))}
       </div>
 
-      {/* MC options count */}
-      <div className="flex items-center gap-3 pt-1">
-        <span className="text-sm text-foreground">Seçenek sayısı:</span>
-        {[2, 3, 4].map((n) => (
-          <button
-            key={n}
-            onClick={() => setConfig({ ...config, optionsCount: n })}
-            className={cn(
-              'w-8 h-8 rounded-lg border text-sm font-medium transition-colors',
-              config.optionsCount === n
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'border-border hover:bg-muted'
-            )}
-          >
-            {n}
-          </button>
-        ))}
+      {/* MC options count + time limit */}
+      <div className="flex items-center flex-wrap gap-x-6 gap-y-3 pt-1">
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-foreground">Seçenek sayısı:</span>
+          {[2, 3, 4].map((n) => (
+            <button key={n} onClick={() => setConfig({ ...config, optionsCount: n })}
+              className={cn('w-8 h-8 rounded-lg border text-sm font-medium transition-colors',
+                config.optionsCount === n ? 'bg-primary text-primary-foreground border-primary' : 'border-border hover:bg-muted'
+              )}>
+              {n}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-foreground">Süre (dk):</span>
+          {[0, 5, 10, 15, 20].map((n) => (
+            <button key={n} onClick={() => setConfig({ ...config, timeLimit: n })}
+              className={cn('px-2 h-8 rounded-lg border text-sm font-medium transition-colors',
+                config.timeLimit === n ? 'bg-primary text-primary-foreground border-primary' : 'border-border hover:bg-muted'
+              )}>
+              {n === 0 ? '∞' : n}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )
