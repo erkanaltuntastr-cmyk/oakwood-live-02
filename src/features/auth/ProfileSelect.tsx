@@ -1,54 +1,46 @@
 import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/state/store'
 import { Avatar } from '@/components/Avatar'
-import { cn } from '@/lib/utils'
 import { ArrowLeft, UserPlus } from 'lucide-react'
 import type { Profile } from '@/types'
 
-// ── Profile card ─────────────────────────────────────────────────────────────
 function ProfileCard({ profile, onClick }: { profile: Profile; onClick: () => void }) {
-  const isParent = profile.role === 'parent'
   return (
     <button
       onClick={onClick}
-      className={cn(
-        'group flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all duration-200',
-        'hover:scale-[1.03] hover:shadow-card-md focus:outline-none focus:ring-2 focus:ring-ring',
-        isParent
-          ? 'border-border hover:border-primary/50 bg-card'
-          : 'border-border hover:border-primary/30 bg-card'
-      )}
+      className="group flex flex-col items-center gap-3 p-6 rounded-2xl bg-white border border-[#EAE4D9] shadow-sm hover:shadow-md hover:border-primary/40 hover:scale-[1.04] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
     >
-      <Avatar profile={profile} size="lg" />
+      <Avatar profile={profile} size="xl" />
       <div className="text-center">
-        <p className="font-semibold text-foreground text-sm leading-tight">{profile.name}</p>
-        {profile.surname && <p className="text-xs text-muted-foreground">{profile.surname}</p>}
-        <p className="text-xs text-muted-foreground mt-1 font-medium">
-          {isParent ? 'Veli' : profile.yearGroup ?? 'Çocuk'}
+        <p className="font-semibold text-[#2D2926] text-base leading-tight">{profile.name}</p>
+        {profile.surname && (
+          <p className="text-sm text-[#7C766C] leading-tight">{profile.surname}</p>
+        )}
+        <p className="text-xs font-medium text-primary mt-1.5 uppercase tracking-wide">
+          {profile.role === 'parent' ? 'Veli' : profile.yearGroup ?? 'Çocuk'}
         </p>
       </div>
     </button>
   )
 }
 
-// ── Empty state ───────────────────────────────────────────────────────────────
 function EmptyState() {
   const navigate = useNavigate()
   return (
-    <div className="flex flex-col items-center justify-center gap-6 py-12 max-w-xs mx-auto text-center">
-      <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center">
-        <UserPlus className="w-8 h-8 text-primary" />
+    <div className="flex flex-col items-center gap-6 py-16 text-center max-w-xs mx-auto">
+      <div className="w-20 h-20 rounded-3xl bg-accent flex items-center justify-center">
+        <UserPlus className="w-10 h-10 text-primary" />
       </div>
       <div>
-        <p className="font-semibold text-foreground">Henüz profil yok</p>
-        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-          İlk olarak bir veli profili oluştur. Sonra çocuk profilleri ekleyebilirsin.
+        <p className="text-lg font-semibold text-[#2D2926]">Henüz profil yok</p>
+        <p className="text-sm text-[#7C766C] mt-2 leading-relaxed">
+          İlk olarak bir veli profili oluştur.<br />Sonra çocuk profilleri ekleyebilirsin.
         </p>
       </div>
       <div className="w-full space-y-3">
         <button
           onClick={() => navigate('/register/parent')}
-          className="w-full oak-btn-primary h-12 text-sm"
+          className="w-full oak-btn-primary h-12 text-sm font-semibold"
         >
           Veli Profili Oluştur
         </button>
@@ -63,7 +55,6 @@ function EmptyState() {
   )
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
 export function ProfileSelect() {
   const { profiles } = useAppStore()
   const navigate = useNavigate()
@@ -73,33 +64,38 @@ export function ProfileSelect() {
   const hasProfiles = profiles.length > 0
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-[#FFF8F5] flex flex-col">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+      <div className="flex items-center justify-between px-8 py-5 border-b border-[#EAE4D9]">
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-2 text-sm text-[#7C766C] hover:text-[#2D2926] transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" /> Geri
+          <ArrowLeft className="w-4 h-4" />
+          Geri
         </button>
-        <h1 className="font-display font-semibold italic text-foreground text-lg">Oakwood</h1>
+        <span className="font-display font-semibold italic text-[#2D2926] text-xl">Oakwood</span>
         <div className="w-16" />
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-8">
+      <div className="flex-1 flex flex-col items-center justify-center px-8 py-12">
         {!hasProfiles ? (
           <EmptyState />
         ) : (
-          <div className="w-full max-w-2xl space-y-10">
-            <p className="text-center text-sm text-muted-foreground">Kim giriyorsun?</p>
+          <div className="w-full max-w-3xl space-y-12">
+
+            {/* Title */}
+            <p className="text-center text-base text-[#7C766C]">Kim giriyorsun?</p>
 
             {/* Parents */}
             {parents.length > 0 && (
-              <section>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 text-center">
-                  Veliler
-                </p>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+              <section className="space-y-5">
+                <div className="flex items-center gap-3">
+                  <div className="h-px flex-1 bg-[#EAE4D9]" />
+                  <p className="text-xs font-bold text-[#7C766C] uppercase tracking-[0.15em]">Veliler</p>
+                  <div className="h-px flex-1 bg-[#EAE4D9]" />
+                </div>
+                <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4">
                   {parents.map((p) => (
                     <ProfileCard key={p.id} profile={p} onClick={() => navigate(`/pin/${p.id}`)} />
                   ))}
@@ -109,17 +105,20 @@ export function ProfileSelect() {
 
             {/* Children */}
             {children.length > 0 && (
-              <section>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4 text-center">
-                  Çocuklar
-                </p>
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+              <section className="space-y-5">
+                <div className="flex items-center gap-3">
+                  <div className="h-px flex-1 bg-[#EAE4D9]" />
+                  <p className="text-xs font-bold text-[#7C766C] uppercase tracking-[0.15em]">Çocuklar</p>
+                  <div className="h-px flex-1 bg-[#EAE4D9]" />
+                </div>
+                <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4">
                   {children.map((p) => (
                     <ProfileCard key={p.id} profile={p} onClick={() => navigate(`/pin/${p.id}`)} />
                   ))}
                 </div>
               </section>
             )}
+
           </div>
         )}
       </div>
