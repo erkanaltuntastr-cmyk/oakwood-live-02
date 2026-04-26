@@ -30,7 +30,7 @@ export function Welcome() {
 
           {/* Primary — Login (always visible, always highlighted) */}
           <button
-            onClick={() => navigate('/profiles')}
+            onClick={() => navigate('/login')}
             className="h-14 w-full rounded-2xl bg-primary text-primary-foreground text-lg font-bold tracking-tight hover:opacity-90 transition-opacity shadow-card-md"
           >
             Giriş Yap
