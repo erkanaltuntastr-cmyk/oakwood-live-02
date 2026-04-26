@@ -1,8 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { Welcome } from '@/features/auth/Welcome'
 import { ProfileSelect } from '@/features/auth/ProfileSelect'
 import { PinEntry } from '@/features/auth/PinEntry'
 import { ParentRegisterForm } from '@/features/auth/ParentRegisterForm'
 import { ChildRegisterForm } from '@/features/auth/ChildRegisterForm'
+import { PostRegister } from '@/features/auth/PostRegister'
 import { AppShell } from '@/app/shell/AppShell'
 import { useAppStore } from '@/state/store'
 import { crypto } from '@/lib/crypto'
@@ -14,13 +16,15 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function RegisterParent() {
-  const { addProfile } = useAppStore()
+  const { addProfile, setActiveProfile } = useAppStore()
   const navigate = useNavigate()
   return (
     <ParentRegisterForm
       onSubmit={(data) => {
-        addProfile({ id: crypto.uuid(), role: 'parent', createdAt: new Date().toISOString(), ...data })
-        navigate('/')
+        const id = crypto.uuid()
+        addProfile({ id, role: 'parent', createdAt: new Date().toISOString(), childIds: [], ...data })
+        setActiveProfile(id)
+        navigate('/post-register')
       }}
       onCancel={() => navigate('/')}
     />
@@ -40,9 +44,9 @@ function RegisterChild() {
         if (parent) {
           updateProfile(parent.id, { childIds: [...(parent.childIds ?? []), childId] })
         }
-        navigate('/')
+        navigate('/app/dashboard')
       }}
-      onCancel={() => navigate('/')}
+      onCancel={() => navigate('/app/dashboard')}
     />
   )
 }
@@ -51,10 +55,12 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<ProfileSelect />} />
+        <Route path="/" element={<Welcome />} />
+        <Route path="/profiles" element={<ProfileSelect />} />
         <Route path="/pin/:profileId" element={<PinEntry />} />
         <Route path="/register/parent" element={<RegisterParent />} />
         <Route path="/register/child" element={<RegisterChild />} />
+        <Route path="/post-register" element={<PostRegister />} />
         <Route
           path="/app/*"
           element={

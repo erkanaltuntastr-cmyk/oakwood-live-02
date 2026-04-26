@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/state/store'
 import { Avatar } from '@/components/Avatar'
 import { cn } from '@/lib/utils'
-import { Plus } from 'lucide-react'
+import { Plus, ArrowLeft } from 'lucide-react'
 import type { Profile } from '@/types'
 
 function ProfileCard({ profile, onClick }: { profile: Profile; onClick: () => void }) {
@@ -55,6 +55,9 @@ export function ProfileSelect() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8">
+      <button onClick={() => navigate('/')} className="absolute top-6 left-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <ArrowLeft className="w-4 h-4" /> Geri
+      </button>
       <div className="mb-12 text-center">
         <h1 className="text-3xl font-display font-semibold italic text-foreground tracking-tight">Oakwood</h1>
         <p className="text-muted-foreground mt-2 text-sm">Kim giriyorsun?</p>
