@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAppStore } from '@/state/store'
 import { Avatar, getColor } from '@/components/Avatar'
+import { crypto } from '@/lib/crypto'
 import type { Profile } from '@/types'
 import { Pencil, Trash2, Plus, X, Check } from 'lucide-react'
 
@@ -256,7 +257,7 @@ function AddChildForm({ parentId, onDone }: { parentId: string; onDone: () => vo
     if (form.pin.length !== 4) { setError('PIN 4 haneli olmalı'); return }
     if (form.pin !== form.pinConfirm) { setError("PIN'ler eşleşmiyor"); return }
 
-    const id = globalThis.crypto.randomUUID()
+    const id = crypto.uuid()
     const initials = [form.name[0], form.surname?.[0]].filter(Boolean).join('').toUpperCase()
     addProfile({
       id,
@@ -332,7 +333,7 @@ function AddParentForm({ onDone }: { onDone: () => void }) {
     if (!form.name.trim()) { setError('Ad zorunlu'); return }
     if (form.pin.length !== 4) { setError('PIN 4 haneli olmalı'); return }
     if (form.pin !== form.pinConfirm) { setError("PIN'ler eşleşmiyor"); return }
-    const id = globalThis.crypto.randomUUID()
+    const id = crypto.uuid()
     const initials = [form.name[0], form.surname?.[0]].filter(Boolean).join('').toUpperCase()
     addProfile({
       id,

@@ -2,31 +2,29 @@ import { useState } from 'react'
 
 interface FormErrors {
   name?: string
-  avatar?: string
   pin?: string
   pinConfirm?: string
 }
 
 interface ParentRegisterFormProps {
-  onSubmit: (data: { name: string; avatar: string; pinHash: string }) => void
+  onSubmit: (data: { name: string; surname?: string; pinHash: string }) => void
   onCancel: () => void
 }
 
-const AVATARS = ['👨', '👩', '👴', '👵', '🧑'] as const
+const inp = 'w-full px-3 py-2.5 text-sm border border-border rounded-xl bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 transition-colors'
+const inpErr = 'w-full px-3 py-2.5 text-sm border border-destructive rounded-xl bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-destructive/40 transition-colors'
 
 export function ParentRegisterForm({ onSubmit, onCancel }: ParentRegisterFormProps) {
   const [name, setName] = useState('')
-  const [selectedAvatar, setSelectedAvatar] = useState<string>('')
+  const [surname, setSurname] = useState('')
   const [pin, setPin] = useState('')
   const [pinConfirm, setPinConfirm] = useState('')
   const [errors, setErrors] = useState<FormErrors>({})
 
   function validate(): boolean {
     const e: FormErrors = {}
-    if (!name.trim()) e.name = 'Ad gereklidir'
-    else if (name.trim().length < 2) e.name = 'Ad en az 2 karakter olmalıdır'
-    if (!selectedAvatar) e.avatar = 'Avatar seçimi gereklidir'
-    if (pin.length !== 4) e.pin = 'PIN 4 haneli olmalıdır'
+    if (!name.trim() || name.trim().length < 2) e.name = 'Ad en az 2 karakter olmalı'
+    if (pin.length !== 4) e.pin = 'PIN 4 haneli olmalı'
     if (pin !== pinConfirm) e.pinConfirm = "PIN'ler eşleşmiyor"
     setErrors(e)
     return Object.keys(e).length === 0
@@ -34,94 +32,53 @@ export function ParentRegisterForm({ onSubmit, onCancel }: ParentRegisterFormPro
 
   function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault()
-    if (validate()) onSubmit({ name: name.trim(), avatar: selectedAvatar, pinHash: pin })
+    if (validate()) onSubmit({ name: name.trim(), surname: surname.trim() || undefined, pinHash: pin })
   }
 
-  function onPin(val: string) { setPin(val.replace(/\D/g, '').slice(0, 4)) }
-  function onPinConfirm(val: string) { setPinConfirm(val.replace(/\D/g, '').slice(0, 4)) }
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Veli Kaydı</h1>
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="w-full max-w-md oak-card-elevated p-8">
+        <h1 className="text-2xl font-display font-semibold italic text-foreground mb-1">Veli Kaydı</h1>
+        <p className="text-sm text-muted-foreground mb-7">Aile profili oluştur</p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Ad</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => { setName(e.target.value); setErrors((er) => ({ ...er, name: undefined })) }}
-              placeholder="Adınızı girin"
-              className={`w-full px-4 py-2.5 border rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-400' : 'border-gray-300'}`}
-            />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-          </div>
-
-          {/* Avatar */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Avatar</label>
-            <div className="flex gap-2">
-              {AVATARS.map((av) => (
-                <button
-                  key={av}
-                  type="button"
-                  onClick={() => { setSelectedAvatar(av); setErrors((er) => ({ ...er, avatar: undefined })) }}
-                  className={`flex-1 py-3 text-3xl rounded-lg transition-all ${selectedAvatar === av ? 'ring-2 ring-blue-500 bg-blue-50' : 'border border-gray-300 hover:bg-gray-50'}`}
-                >
-                  {av}
-                </button>
-              ))}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Ad *</label>
+              <input className={errors.name ? inpErr : inp} value={name}
+                onChange={(e) => { setName(e.target.value); setErrors((er) => ({ ...er, name: undefined })) }}
+                placeholder="Adınızı girin" />
+              {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
             </div>
-            {errors.avatar && <p className="text-red-500 text-sm mt-1">{errors.avatar}</p>}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Soyad</label>
+              <input className={inp} value={surname} onChange={(e) => setSurname(e.target.value)} placeholder="Soyad" />
+            </div>
           </div>
 
-          {/* PIN */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">PIN (4 hane)</label>
-            <input
-              type="password"
-              inputMode="numeric"
-              value={pin}
-              onChange={(e) => { onPin(e.target.value); setErrors((er) => ({ ...er, pin: undefined })) }}
-              placeholder="••••"
-              maxLength={4}
-              className={`w-full px-4 py-2.5 border rounded-lg text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.pin ? 'border-red-400' : 'border-gray-300'}`}
-            />
-            {errors.pin && <p className="text-red-500 text-sm mt-1">{errors.pin}</p>}
+          <div className="border-t border-border pt-5">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">PIN Oluştur</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">PIN (4 hane) *</label>
+                <input className={errors.pin ? inpErr : inp} type="password" inputMode="numeric"
+                  maxLength={4} placeholder="••••" value={pin}
+                  onChange={(e) => { setPin(e.target.value.replace(/\D/g, '').slice(0, 4)); setErrors((er) => ({ ...er, pin: undefined })) }} />
+                {errors.pin && <p className="text-xs text-destructive mt-1">{errors.pin}</p>}
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">PIN Tekrar *</label>
+                <input className={errors.pinConfirm ? inpErr : inp} type="password" inputMode="numeric"
+                  maxLength={4} placeholder="••••" value={pinConfirm}
+                  onChange={(e) => { setPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 4)); setErrors((er) => ({ ...er, pinConfirm: undefined })) }} />
+                {errors.pinConfirm && <p className="text-xs text-destructive mt-1">{errors.pinConfirm}</p>}
+              </div>
+            </div>
           </div>
 
-          {/* PIN confirm */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">PIN Tekrarı</label>
-            <input
-              type="password"
-              inputMode="numeric"
-              value={pinConfirm}
-              onChange={(e) => { onPinConfirm(e.target.value); setErrors((er) => ({ ...er, pinConfirm: undefined })) }}
-              placeholder="••••"
-              maxLength={4}
-              className={`w-full px-4 py-2.5 border rounded-lg text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.pinConfirm ? 'border-red-400' : 'border-gray-300'}`}
-            />
-            {errors.pinConfirm && <p className="text-red-500 text-sm mt-1">{errors.pinConfirm}</p>}
-          </div>
-
-          {/* Buttons */}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-            >
-              İptal
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-            >
-              Kaydol
-            </button>
+          <div className="flex gap-3 pt-1">
+            <button type="button" onClick={onCancel} className="flex-1 oak-btn-ghost">İptal</button>
+            <button type="submit" className="flex-1 oak-btn-primary">Kaydol</button>
           </div>
         </form>
       </div>

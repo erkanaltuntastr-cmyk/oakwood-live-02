@@ -22,30 +22,39 @@ export function QuizSession() {
   const [gapValue, setGapValue] = useState('')
   const [showHint, setShowHint] = useState(false)
   const [showExplanation, setShowExplanation] = useState(false)
-  const [answered, setAnswered] = useState(false)
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null)
   const [elapsed, setElapsed] = useState(0)
   const timeLimitSec = (session?.config.timeLimit ?? 0) * 60
 
-  // Mark started
   useEffect(() => {
     if (session && session.status === 'pending') {
       updateQuizSession(session.id, { status: 'in_progress', startedAt: new Date().toISOString() })
     }
   }, [session?.id])
 
-  // Timer — counts up; if timeLimit set, auto-submit when reached
   useEffect(() => {
     const t = setInterval(() => {
       setElapsed((e) => {
         const next = e + 1
-        if (timeLimitSec > 0 && next >= timeLimitSec) {
-          clearInterval(t)
-        }
+        if (timeLimitSec > 0 && next >= timeLimitSec) clearInterval(t)
         return next
       })
     }, 1000)
     return () => clearInterval(t)
   }, [timeLimitSec])
+
+  // When user selects an answer on MC, immediately record and show explanation if configured
+  function handleSelect(i: number) {
+    if (!session) return
+    setSelected(i)
+    const question = session.questions[currentQ]
+    const value = question.options?.[i] ?? ''
+    const correct = checkAnswer(question, value)
+    setLastAnswerCorrect(correct)
+    if (session.config.showExplanation && question.explanation) {
+      setShowExplanation(true)
+    }
+  }
 
   const handleNext = useCallback(() => {
     if (!session) return
@@ -64,7 +73,6 @@ export function QuizSession() {
 
     const isLast = currentQ === session.questions.length - 1
     if (isLast) {
-      // Calculate score and complete
       const correctCount = answers.filter((a) => a?.correct).length
       const score = Math.round((correctCount / session.questions.length) * 100)
       updateQuizSession(session.id, {
@@ -80,7 +88,7 @@ export function QuizSession() {
       setGapValue('')
       setShowHint(false)
       setShowExplanation(false)
-      setAnswered(false)
+      setLastAnswerCorrect(null)
     }
   }, [session, currentQ, selected, gapValue])
 
@@ -99,13 +107,12 @@ export function QuizSession() {
   const question = session.questions[currentQ]
   const isGap = question.type === 'gap-fill'
   const isOpen = question.type === 'open-ended'
-  const canProceed = isOpen ? gapValue.trim().length > 0 : (selected !== null || gapValue.trim().length > 0)
+  const canProceed = selected !== null || gapValue.trim().length > 0
 
-  // For gap-fill and open-ended, render a custom input instead of options
+  // Gap-fill and open-ended: custom layout
   if (isGap || isOpen) {
     return (
       <div className="max-w-2xl space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wider">{session.subject}</p>
@@ -114,28 +121,26 @@ export function QuizSession() {
           <span className="font-mono text-sm bg-muted px-3 py-1 rounded-lg">{timeDisplay}</span>
         </div>
 
-        {/* Progress */}
         <div>
           <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
             <span>Soru {currentQ + 1} / {session.questions.length}</span>
           </div>
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${((currentQ + 1) / session.questions.length) * 100}%` }} />
+            <div className="h-full bg-primary rounded-full transition-all"
+              style={{ width: `${((currentQ + 1) / session.questions.length) * 100}%` }} />
           </div>
         </div>
 
-        {/* Question */}
         <div className="oak-card p-6">
           <p className="text-base font-medium text-foreground leading-relaxed">{question.prompt}</p>
         </div>
 
-        {/* Input */}
         <textarea
           value={gapValue}
           onChange={(e) => setGapValue(e.target.value)}
           placeholder={isOpen ? 'Cevabını yaz...' : 'Boşluğa yazılacak kelime...'}
           rows={isOpen ? 4 : 2}
-          className="w-full border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 resize-none"
+          className="w-full border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 resize-none bg-background"
         />
 
         {session.config.showHint && question.hint && (
@@ -143,17 +148,18 @@ export function QuizSession() {
             <button onClick={() => setShowHint(!showHint)} className="text-xs text-primary underline">
               {showHint ? 'İpucunu gizle' : 'İpucu göster'}
             </button>
-            {showHint && <p className="text-xs text-muted-foreground mt-1 bg-accent/30 px-3 py-2 rounded-lg">{question.hint}</p>}
+            {showHint && (
+              <p className="text-xs text-muted-foreground mt-1.5 bg-accent/40 border border-border px-3 py-2 rounded-lg">
+                💡 {question.hint}
+              </p>
+            )}
           </div>
         )}
 
         <div className="flex justify-between">
           <span />
-          <button
-            onClick={handleNext}
-            disabled={!canProceed}
-            className="oak-btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
-          >
+          <button onClick={handleNext} disabled={!canProceed}
+            className="oak-btn-primary disabled:opacity-40 disabled:cursor-not-allowed">
             {currentQ === session.questions.length - 1 ? 'Bitir' : 'Sonraki'}
           </button>
         </div>
@@ -161,7 +167,7 @@ export function QuizSession() {
     )
   }
 
-  // Multiple choice via shell
+  // Multiple choice
   return (
     <QuizSessionShell
       title={`${session.subject} — ${question.topic}`}
@@ -171,12 +177,12 @@ export function QuizSession() {
       question={question.prompt}
       options={question.options ?? []}
       selectedOption={selected}
-      onSelect={(i) => { setSelected(i); setAnswered(true) }}
-      onHint={() => setShowHint(!showHint)}
+      onSelect={handleSelect}
+      onHint={() => setShowHint((h) => !h)}
       onNext={handleNext}
       hint={showHint && session.config.showHint ? question.hint : undefined}
       explanation={
-        showExplanation && answered && session.config.showExplanation
+        showExplanation && lastAnswerCorrect !== null && session.config.showExplanation
           ? question.explanation
           : undefined
       }

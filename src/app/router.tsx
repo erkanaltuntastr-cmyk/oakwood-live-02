@@ -28,7 +28,7 @@ function RegisterParent() {
 }
 
 function RegisterChild() {
-  const { addProfile, activeProfileId, profiles } = useAppStore()
+  const { addProfile, updateProfile, activeProfileId, profiles } = useAppStore()
   const navigate = useNavigate()
   const parent = profiles.find((p) => p.id === activeProfileId)
 
@@ -37,9 +37,8 @@ function RegisterChild() {
       onSubmit={(data) => {
         const childId = crypto.uuid()
         addProfile({ id: childId, role: 'child', createdAt: new Date().toISOString(), ...data })
-        // link child to parent
         if (parent) {
-          addProfile({ ...parent, childIds: [...(parent.childIds ?? []), childId] })
+          updateProfile(parent.id, { childIds: [...(parent.childIds ?? []), childId] })
         }
         navigate('/')
       }}

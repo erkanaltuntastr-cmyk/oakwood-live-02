@@ -2,14 +2,32 @@ import type { QuizSession } from '@/types'
 
 const API_BASE = 'http://localhost:3001'
 
-export async function callAI(messages: { role: string; content: string }[], systemPrompt: string) {
-  const res = await fetch(`${API_BASE}/api/ai/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, systemPrompt }),
-  })
-  if (!res.ok) throw new Error(`AI error: ${res.status}`)
-  return res.json() as Promise<{ success: boolean; content: string }>
+const FALLBACK_MESSAGES: Record<string, string> = {
+  quiz: 'AI servisi şu an bağlı değil. Ayarlar\'dan API key ekleyebilir ya da yerel AI bridge kurabilirsin.',
+  chat: 'AI bağlantısı kurulamadı. Lütfen tekrar dene.',
+}
+
+export async function callAI(
+  messages: { role: string; content: string }[],
+  systemPrompt: string
+): Promise<{ success: boolean; content: string }> {
+  try {
+    const res = await fetch(`${API_BASE}/api/ai/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages, systemPrompt }),
+      signal: AbortSignal.timeout(15000),
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      return { success: false, content: err.message ?? FALLBACK_MESSAGES.quiz }
+    }
+
+    return res.json()
+  } catch {
+    return { success: false, content: FALLBACK_MESSAGES.quiz }
+  }
 }
 
 export function quizFeedbackPrompt(session: QuizSession): string {

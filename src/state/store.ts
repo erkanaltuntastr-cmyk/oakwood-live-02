@@ -4,6 +4,24 @@ import type { Profile, QuizDraft, QuizSession } from '@/types'
 import type { HomeworkItem } from '@/lib/homeworkService'
 export type { Profile }
 
+export interface DirectMessage {
+  id: string
+  fromId: string
+  toId: string
+  text: string
+  sentAt: string
+  read: boolean
+}
+
+export interface NoteThread {
+  id: string
+  subject: string
+  topic: string
+  authorId: string
+  createdAt: string
+  replies: { id: string; authorId: string; text: string; createdAt: string }[]
+}
+
 interface AppState {
   profiles: Profile[]
   activeProfileId: string | null
@@ -11,6 +29,8 @@ interface AppState {
   quizDrafts: QuizDraft[]
   quizSessions: QuizSession[]
   homework: HomeworkItem[]
+  directMessages: DirectMessage[]
+  noteThreads: NoteThread[]
 
   setActiveProfile:    (id: string | null) => void
   setActiveChild:      (id: string | null) => void
@@ -22,6 +42,10 @@ interface AppState {
   updateQuizSession:   (id: string, updates: Partial<QuizSession>) => void
   addHomework:         (items: HomeworkItem[]) => void
   completeHomework:    (id: string) => void
+  sendDirectMessage:   (msg: DirectMessage) => void
+  markRead:            (fromId: string, toId: string) => void
+  addNoteThread:       (thread: NoteThread) => void
+  addNoteReply:        (threadId: string, reply: NoteThread['replies'][0]) => void
 }
 
 // Demo data sourced from live/src/usecases/demoSeed.js
@@ -107,6 +131,20 @@ export const useAppStore = create<AppState>()(
       quizDrafts: [],
       quizSessions: [],
       homework: [],
+      directMessages: [
+        { id: 'm1', fromId: 'p1', toId: 'p2', text: "Bu hafta Oliver'ın ödevleri var mıydı?", sentAt: new Date(Date.now() - 3600000).toISOString(), read: true },
+        { id: 'm2', fromId: 'p2', toId: 'p1', text: 'Evet, matematik ve İngilizce var. Ben bakıyorum.', sentAt: new Date(Date.now() - 1800000).toISOString(), read: true },
+      ],
+      noteThreads: [
+        {
+          id: 't1', subject: 'Mathematics', topic: 'Fractions', authorId: 'p1',
+          createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+          replies: [
+            { id: 'r1', authorId: 'p1', text: 'Amelia kesirlerle biraz zorlanıyor, bu hafta daha fazla alıştırma yaptıralım.', createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
+            { id: 'r2', authorId: 'p2', text: 'Tamam, ben de akşamları 15 dk bakarım.', createdAt: new Date(Date.now() - 86400000).toISOString() },
+          ],
+        },
+      ],
 
       setActiveProfile: (id) => set({ activeProfileId: id, activeChildId: null }),
       setActiveChild:   (id) => set({ activeChildId: id }),
@@ -151,6 +189,26 @@ export const useAppStore = create<AppState>()(
         set((s) => ({
           homework: s.homework.map((h) =>
             h.id === id ? { ...h, status: 'completed', completedAt: new Date().toISOString() } : h
+          ),
+        })),
+
+      sendDirectMessage: (msg) =>
+        set((s) => ({ directMessages: [...s.directMessages, msg] })),
+
+      markRead: (fromId, toId) =>
+        set((s) => ({
+          directMessages: s.directMessages.map((m) =>
+            m.fromId === fromId && m.toId === toId ? { ...m, read: true } : m
+          ),
+        })),
+
+      addNoteThread: (thread) =>
+        set((s) => ({ noteThreads: [...s.noteThreads, thread] })),
+
+      addNoteReply: (threadId, reply) =>
+        set((s) => ({
+          noteThreads: s.noteThreads.map((t) =>
+            t.id !== threadId ? t : { ...t, replies: [...t.replies, reply] }
           ),
         })),
     }),

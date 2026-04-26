@@ -46,18 +46,15 @@ export function QuizResult() {
 
   async function handleAiSuggest() {
     setAiLoading(true)
-    try {
-      const result = await callAI(
-        [buildFeedbackMessage(session!)],
-        quizFeedbackPrompt(session!)
-      )
-      setAiText(result.content)
+    const result = await callAI(
+      [buildFeedbackMessage(session!)],
+      quizFeedbackPrompt(session!)
+    )
+    setAiText(result.content)
+    if (result.success) {
       updateQuizSession(session!.id, { report: { ...report, growth: [result.content] } })
-    } catch {
-      setAiText('AI servisi şu an kullanılamıyor. Ayarlar\'dan API key ekleyebilirsin.')
-    } finally {
-      setAiLoading(false)
     }
+    setAiLoading(false)
   }
 
   function handleRetry() {

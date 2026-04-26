@@ -4,105 +4,89 @@ import { Avatar } from '@/components/Avatar'
 import { Send, MessageSquare, Plus, Users } from 'lucide-react'
 import { crypto } from '@/lib/crypto'
 import { cn } from '@/lib/utils'
+import type { NoteThread } from '@/state/store'
 
-// ── Types ──────────────────────────────────────────────────────────────────
+const inp = 'w-full px-3 py-2 text-sm border border-border rounded-xl bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40'
 
-interface DirectMessage {
-  id: string
-  fromId: string
-  toId: string
-  text: string
-  sentAt: string
-  read: boolean
-}
-
-interface Thread {
-  id: string
-  subject: string
-  topic: string
-  authorId: string
-  createdAt: string
-  replies: { id: string; authorId: string; text: string; createdAt: string }[]
-}
-
-const inp = 'w-full px-3 py-2 text-sm border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40'
-
-// ── Direct Messages tab ────────────────────────────────────────────────────
+// ── Direct Messages ────────────────────────────────────────────────────────
 
 function DirectMessages() {
-  const { profiles, activeProfileId } = useAppStore()
-  const [messages, setMessages] = useState<DirectMessage[]>([
-    {
-      id: 'm1', fromId: 'p1', toId: 'p2',
-      text: 'Bu hafta Oliver\'ın ödevleri var mıydı?',
-      sentAt: new Date(Date.now() - 3600000).toISOString(), read: true,
-    },
-    {
-      id: 'm2', fromId: 'p2', toId: 'p1',
-      text: 'Evet, matematik ve İngilizce var. Ben bakıyorum.',
-      sentAt: new Date(Date.now() - 1800000).toISOString(), read: true,
-    },
-  ])
+  const { profiles, activeProfileId, directMessages, sendDirectMessage, markRead } = useAppStore()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [text, setText] = useState('')
 
   const family = profiles.filter((p) => p.id !== activeProfileId)
-  const selected = family.find((p) => p.id === selectedId)
 
-  const conversation = messages.filter((m) =>
-    (m.fromId === activeProfileId && m.toId === selectedId) ||
-    (m.fromId === selectedId && m.toId === activeProfileId)
-  ).sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime())
+  function conversation(otherId: string) {
+    return directMessages
+      .filter((m) =>
+        (m.fromId === activeProfileId && m.toId === otherId) ||
+        (m.fromId === otherId && m.toId === activeProfileId)
+      )
+      .sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime())
+  }
+
+  function unread(profileId: string) {
+    return directMessages.filter(
+      (m) => m.fromId === profileId && m.toId === activeProfileId && !m.read
+    ).length
+  }
+
+  function handleSelect(id: string) {
+    setSelectedId(id)
+    markRead(id, activeProfileId!)
+  }
 
   function send() {
     if (!text.trim() || !selectedId || !activeProfileId) return
-    setMessages((ms) => [...ms, {
+    sendDirectMessage({
       id: crypto.uuid(),
       fromId: activeProfileId,
       toId: selectedId,
       text: text.trim(),
       sentAt: new Date().toISOString(),
       read: false,
-    }])
+    })
     setText('')
   }
 
-  function unreadCount(profileId: string) {
-    return messages.filter((m) => m.fromId === profileId && m.toId === activeProfileId && !m.read).length
-  }
+  const selected = family.find((p) => p.id === selectedId)
+  const msgs = selectedId ? conversation(selectedId) : []
 
   return (
     <div className="flex gap-4 h-[480px]">
       {/* Contact list */}
-      <div className="w-48 shrink-0 space-y-1 overflow-y-auto">
+      <div className="w-44 shrink-0 space-y-1 overflow-y-auto">
         {family.map((p) => {
-          const unread = unreadCount(p.id)
+          const count = unread(p.id)
           return (
-            <button key={p.id} onClick={() => setSelectedId(p.id)}
+            <button key={p.id} onClick={() => handleSelect(p.id)}
               className={cn(
                 'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-colors',
                 selectedId === p.id ? 'bg-accent text-primary' : 'hover:bg-muted text-foreground'
-              )}
-            >
+              )}>
               <Avatar profile={p} size="sm" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{p.name}</p>
                 <p className="text-xs text-muted-foreground">{p.role === 'parent' ? 'Veli' : p.yearGroup}</p>
               </div>
-              {unread > 0 && (
+              {count > 0 && (
                 <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0">
-                  {unread}
+                  {count}
                 </span>
               )}
             </button>
           )
         })}
+        {family.length === 0 && (
+          <p className="text-xs text-muted-foreground px-2">Başka aile üyesi yok.</p>
+        )}
       </div>
 
       {/* Conversation */}
       <div className="flex-1 oak-card flex flex-col overflow-hidden">
         {!selected ? (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+          <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">
             Bir aile üyesi seç
           </div>
         ) : (
@@ -112,16 +96,17 @@ function DirectMessages() {
               <p className="text-sm font-semibold text-foreground">{selected.name}</p>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {conversation.length === 0 && (
+              {msgs.length === 0 && (
                 <p className="text-center text-xs text-muted-foreground">Henüz mesaj yok.</p>
               )}
-              {conversation.map((m) => {
+              {msgs.map((m) => {
                 const isMe = m.fromId === activeProfileId
                 return (
                   <div key={m.id} className={cn('flex', isMe ? 'justify-end' : 'justify-start')}>
                     <div className={cn(
-                      'max-w-[75%] px-3 py-2 rounded-2xl text-sm leading-relaxed',
-                      isMe ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-muted text-foreground rounded-bl-sm'
+                      'max-w-[75%] px-3.5 py-2 rounded-2xl text-sm leading-relaxed',
+                      isMe ? 'bg-primary text-primary-foreground rounded-br-sm'
+                           : 'bg-muted text-foreground rounded-bl-sm border border-border'
                     )}>
                       <p>{m.text}</p>
                       <p className={cn('text-xs mt-1', isMe ? 'text-primary-foreground/60' : 'text-muted-foreground')}>
@@ -133,14 +118,12 @@ function DirectMessages() {
               })}
             </div>
             <div className="px-4 py-3 border-t border-border flex gap-2">
-              <input
-                value={text}
-                onChange={(e) => setText(e.target.value)}
+              <input value={text} onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && send()}
                 placeholder={`${selected.name}'e mesaj yaz...`}
-                className="flex-1 text-sm bg-muted border border-border rounded-xl px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
-              />
-              <button onClick={send} className="w-9 h-9 flex items-center justify-center bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-opacity shrink-0">
+                className={inp} />
+              <button onClick={send}
+                className="w-9 h-9 flex items-center justify-center bg-primary text-primary-foreground rounded-xl hover:opacity-90 shrink-0">
                 <Send className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -151,45 +134,38 @@ function DirectMessages() {
   )
 }
 
-// ── Shared Notes (threaded) ────────────────────────────────────────────────
+// ── Shared Notes ───────────────────────────────────────────────────────────
 
 function SharedNotes() {
-  const { profiles, activeProfileId } = useAppStore()
-  const [threads, setThreads] = useState<Thread[]>([
-    {
-      id: 't1', subject: 'Mathematics', topic: 'Fractions', authorId: 'p1',
-      createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-      replies: [
-        { id: 'r1', authorId: 'p1', text: 'Amelia kesirlerle biraz zorlanıyor, bu hafta daha fazla alıştırma yaptıralım.', createdAt: new Date(Date.now() - 86400000 * 2).toISOString() },
-        { id: 'r2', authorId: 'p2', text: 'Tamam, ben de akşamları 15 dk bakarım.', createdAt: new Date(Date.now() - 86400000).toISOString() },
-      ],
-    },
-  ])
+  const { profiles, activeProfileId, noteThreads, addNoteThread, addNoteReply } = useAppStore()
   const [adding, setAdding] = useState(false)
   const [openId, setOpenId] = useState<string | null>(null)
   const [replyText, setReplyText] = useState('')
   const [newForm, setNewForm] = useState({ subject: '', topic: '', text: '' })
 
-  function addThread() {
+  function handleAddThread() {
     if (!newForm.subject || !newForm.text || !activeProfileId) return
     const now = new Date().toISOString()
-    setThreads((ts) => [...ts, {
-      id: crypto.uuid(), subject: newForm.subject, topic: newForm.topic,
-      authorId: activeProfileId, createdAt: now,
+    addNoteThread({
+      id: crypto.uuid(),
+      subject: newForm.subject,
+      topic: newForm.topic,
+      authorId: activeProfileId,
+      createdAt: now,
       replies: [{ id: crypto.uuid(), authorId: activeProfileId, text: newForm.text, createdAt: now }],
-    }])
+    })
     setNewForm({ subject: '', topic: '', text: '' })
     setAdding(false)
   }
 
-  function addReply(threadId: string) {
+  function handleAddReply(thread: NoteThread) {
     if (!replyText.trim() || !activeProfileId) return
-    setThreads((ts) => ts.map((t) =>
-      t.id !== threadId ? t : {
-        ...t,
-        replies: [...t.replies, { id: crypto.uuid(), authorId: activeProfileId, text: replyText.trim(), createdAt: new Date().toISOString() }],
-      }
-    ))
+    addNoteReply(thread.id, {
+      id: crypto.uuid(),
+      authorId: activeProfileId,
+      text: replyText.trim(),
+      createdAt: new Date().toISOString(),
+    })
     setReplyText('')
   }
 
@@ -197,7 +173,8 @@ function SharedNotes() {
     <div className="space-y-4">
       <div className="flex justify-end">
         {!adding && (
-          <button onClick={() => setAdding(true)} className="flex items-center gap-1.5 text-sm text-primary font-medium hover:opacity-80">
+          <button onClick={() => setAdding(true)}
+            className="flex items-center gap-1.5 text-sm text-primary font-medium hover:opacity-80">
             <Plus className="w-4 h-4" /> Yeni Not
           </button>
         )}
@@ -206,18 +183,21 @@ function SharedNotes() {
       {adding && (
         <div className="oak-card p-5 space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <input className={inp} placeholder="Ders" value={newForm.subject} onChange={(e) => setNewForm({ ...newForm, subject: e.target.value })} />
-            <input className={inp} placeholder="Konu" value={newForm.topic} onChange={(e) => setNewForm({ ...newForm, topic: e.target.value })} />
+            <input className={inp} placeholder="Ders" value={newForm.subject}
+              onChange={(e) => setNewForm({ ...newForm, subject: e.target.value })} />
+            <input className={inp} placeholder="Konu" value={newForm.topic}
+              onChange={(e) => setNewForm({ ...newForm, topic: e.target.value })} />
           </div>
-          <textarea className={inp} rows={3} placeholder="Not..." value={newForm.text} onChange={(e) => setNewForm({ ...newForm, text: e.target.value })} />
+          <textarea className={inp} rows={3} placeholder="Not..." value={newForm.text}
+            onChange={(e) => setNewForm({ ...newForm, text: e.target.value })} />
           <div className="flex gap-2">
             <button onClick={() => setAdding(false)} className="flex-1 oak-btn-ghost text-sm py-2">İptal</button>
-            <button onClick={addThread} className="flex-1 oak-btn-primary text-sm py-2">Ekle</button>
+            <button onClick={handleAddThread} className="flex-1 oak-btn-primary text-sm py-2">Ekle</button>
           </div>
         </div>
       )}
 
-      {threads.map((t) => (
+      {noteThreads.map((t) => (
         <div key={t.id} className="oak-card overflow-hidden">
           <button onClick={() => setOpenId(openId === t.id ? null : t.id)}
             className="w-full flex items-start justify-between gap-3 px-5 py-4 hover:bg-muted/30 transition-colors text-left">
@@ -227,7 +207,9 @@ function SharedNotes() {
                 {t.topic && <span className="text-xs text-muted-foreground">{t.topic}</span>}
               </div>
               <p className="text-sm text-foreground line-clamp-1">{t.replies[0]?.text}</p>
-              <p className="text-xs text-muted-foreground mt-1">{t.replies.length} not · {new Date(t.createdAt).toLocaleDateString('tr-TR')}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {t.replies.length} not · {new Date(t.createdAt).toLocaleDateString('tr-TR')}
+              </p>
             </div>
             <MessageSquare className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
           </button>
@@ -253,9 +235,10 @@ function SharedNotes() {
               </div>
               <div className="px-5 py-3 border-t border-border flex gap-2">
                 <input value={replyText} onChange={(e) => setReplyText(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && addReply(t.id)}
-                  placeholder="Yanıt..." className="flex-1 text-sm bg-muted border border-border rounded-xl px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40" />
-                <button onClick={() => addReply(t.id)} className="w-9 h-9 flex items-center justify-center bg-primary text-primary-foreground rounded-xl hover:opacity-90 shrink-0">
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddReply(t)}
+                  placeholder="Yanıt..." className={inp} />
+                <button onClick={() => handleAddReply(t)}
+                  className="w-9 h-9 flex items-center justify-center bg-primary text-primary-foreground rounded-xl hover:opacity-90 shrink-0">
                   <Send className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -264,14 +247,14 @@ function SharedNotes() {
         </div>
       ))}
 
-      <div className="oak-card p-4 border-dashed text-center text-xs text-muted-foreground">
+      <div className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
         Öğretmen bağlantısı V2'de gelecek
       </div>
     </div>
   )
 }
 
-// ── Main Messages page ─────────────────────────────────────────────────────
+// ── Main ───────────────────────────────────────────────────────────────────
 
 export function Messages() {
   const [tab, setTab] = useState<'direct' | 'notes'>('direct')
@@ -283,18 +266,16 @@ export function Messages() {
         <p className="text-muted-foreground mt-1 text-sm">Aile içi mesajlaşma ve paylaşılan notlar.</p>
       </div>
 
-      {/* Tabs */}
       <div className="flex gap-1 bg-muted p-1 rounded-xl w-fit">
         {[
-          { id: 'direct', icon: Users, label: 'Direkt Mesajlar' },
+          { id: 'direct', icon: Users, label: 'Direkt' },
           { id: 'notes', icon: MessageSquare, label: 'Paylaşılan Notlar' },
         ].map(({ id, icon: Icon, label }) => (
           <button key={id} onClick={() => setTab(id as 'direct' | 'notes')}
             className={cn(
               'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
               tab === id ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
+            )}>
             <Icon className="w-4 h-4" />
             {label}
           </button>
