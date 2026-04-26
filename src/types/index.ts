@@ -44,19 +44,26 @@ export interface Profile {
   // display
   name: string
   surname?: string
-  initials?: string       // auto-computed if not set
-  color?: string          // avatar bg color (tailwind class)
+  initials?: string
+  color?: string
   // auth
   pinHash: string
+  // shared
+  dob?: string            // DD/MM/YYYY
+  gender?: string
   // parent-specific
   childIds?: string[]
   familyName?: string
   postcode?: string
   email?: string
+  gsm?: string
+  profession?: string
+  placeOfBirth?: string
+  aiBio?: string          // AI context / parental insights
+  legalConsent?: boolean
   // child-specific
   yearGroup?: string
   school?: string
-  dob?: string            // DD/MM/YYYY
   notes?: string
   hobbies?: string[]
   subjects?: { name: string; active: boolean }[]
