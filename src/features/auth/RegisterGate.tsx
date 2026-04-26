@@ -12,6 +12,9 @@ import { crypto } from '@/lib/crypto'
 import type { RegistrationRequest } from '@/types'
 import { CheckCircle2, Clock } from 'lucide-react'
 
+// Default open invite code — unlimited use, auto-approves without admin review
+export const DEFAULT_INVITE_CODE = 'OAKWOOD.PHA'
+
 type Mode = 'parent' | 'child'
 
 function InviteCodeEntry({ onSubmit, onSkip }: { onSubmit: (code: string) => void; onSkip: () => void }) {
@@ -28,8 +31,8 @@ function InviteCodeEntry({ onSubmit, onSkip }: { onSubmit: (code: string) => voi
         <input
           value={code}
           onChange={(e) => setCode(e.target.value.toUpperCase().trim())}
-          placeholder="Örn: OAK-2026-ABC"
-          className="w-full px-3 py-2.5 text-sm border border-border rounded-xl bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 font-mono tracking-wider"
+          placeholder={DEFAULT_INVITE_CODE}
+          className="w-full px-3 py-2.5 text-sm border border-border rounded-xl bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 font-mono tracking-wider"
         />
         <div className="flex gap-3">
           <button onClick={onSkip} className="flex-1 oak-btn-ghost">Kodu Yok</button>
@@ -90,12 +93,20 @@ export function RegisterGate({ mode }: { mode: Mode }) {
 
   function handleCodeSubmit(code: string) {
     if (!code) { setStep('form'); return }
+
+    // Default open code — always valid, unlimited, never consumed
+    if (code.toUpperCase() === DEFAULT_INVITE_CODE) {
+      setResolvedInvite({ id: 'default', code: DEFAULT_INVITE_CODE, createdBy: 'system', used: false })
+      setInviteCode(code)
+      setStep('form')
+      return
+    }
+
     const invite = useInviteCode(code, 'pending')
     if (invite) {
       setResolvedInvite(invite)
       setInviteCode(code)
     }
-    // Valid or not, proceed to form; validity checked on submit
     setStep('form')
   }
 
