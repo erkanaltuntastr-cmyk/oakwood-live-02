@@ -87,6 +87,14 @@ export function Welcome() {
             </p>
           </div>
           <div className="mx-auto mt-5 h-1.5 w-20 rounded-full bg-border" />
+          <div className="text-center mt-4">
+            <button
+              onClick={() => navigate('/admin')}
+              className="text-xs text-muted-foreground/40 hover:text-muted-foreground transition-colors"
+            >
+              admin
+            </button>
+          </div>
         </div>
       </div>
     </div>
