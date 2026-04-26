@@ -2,21 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/state/store'
 
 export function Welcome() {
-  const { loadDemo, profiles } = useAppStore()
+  const { loadDemo } = useAppStore()
   const navigate = useNavigate()
-
-  function handleDemo() {
-    loadDemo()
-    navigate('/app/dashboard')
-  }
-
-  function handleLogin() {
-    navigate('/profiles')
-  }
-
-  function handleRegister() {
-    navigate('/register/parent')
-  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -39,30 +26,25 @@ export function Welcome() {
         <div className="mt-8 border-t border-border" />
 
         {/* Actions */}
-        <div className="mt-8 space-y-4">
-          {/* Primary — Login (only if profiles exist) */}
-          {profiles.length > 0 && (
-            <button
-              onClick={handleLogin}
-              className="h-14 w-full rounded-2xl bg-primary text-primary-foreground text-lg font-bold tracking-tight hover:opacity-90 transition-opacity shadow-card-md"
-            >
-              Giriş Yap
-            </button>
-          )}
+        <div className="mt-8 space-y-3">
 
-          {/* Register — primary if no profiles yet */}
+          {/* Primary — Login (always visible, always highlighted) */}
           <button
-            onClick={handleRegister}
-            className={`h-14 w-full rounded-2xl font-bold text-base tracking-tight transition-opacity hover:opacity-90 ${
-              profiles.length === 0
-                ? 'bg-primary text-primary-foreground shadow-card-md'
-                : 'border border-border bg-background text-foreground'
-            }`}
+            onClick={() => navigate('/profiles')}
+            className="h-14 w-full rounded-2xl bg-primary text-primary-foreground text-lg font-bold tracking-tight hover:opacity-90 transition-opacity shadow-card-md"
+          >
+            Giriş Yap
+          </button>
+
+          {/* Secondary — Register */}
+          <button
+            onClick={() => navigate('/register/parent')}
+            className="h-12 w-full rounded-2xl border border-border bg-background text-foreground text-sm font-semibold hover:bg-muted transition-colors"
           >
             Kayıt Ol
           </button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 py-1">
             <div className="h-px flex-1 bg-border" />
             <span className="text-xs text-muted-foreground">veya</span>
             <div className="h-px flex-1 bg-border" />
@@ -70,7 +52,7 @@ export function Welcome() {
 
           {/* Demo */}
           <button
-            onClick={handleDemo}
+            onClick={() => { loadDemo(); navigate('/app/dashboard') }}
             className="h-11 w-full rounded-xl border border-border bg-muted text-sm font-semibold text-foreground hover:bg-accent/50 transition-colors"
           >
             Demo'yu Dene
