@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAppStore, ADMIN_ID } from '@/state/store'
 import { Avatar, getColor } from '@/components/Avatar'
 import { crypto } from '@/lib/crypto'
+import { useLang } from '@/lib/useLang'
 import { cn } from '@/lib/utils'
 import {
   Users, ClipboardList, GitBranch, MessageSquare,
@@ -276,12 +277,12 @@ function FamiliesTab() {
                   </label>
                 )
               })}
-              {children.length === 0 && <p className="text-xs text-muted-foreground px-3">Sistemde çocuk profili yok.</p>}
+              {children.length === 0 && <p className="text-xs text-muted-foreground px-3">No learner profiles in system.</p>}
             </div>
           </div>
         )
       })}
-      {parents.length === 0 && <div className="oak-card p-8 text-center text-muted-foreground text-sm">Veli profili yok.</div>}
+      {parents.length === 0 && <div className="oak-card p-8 text-center text-muted-foreground text-sm">No parent profiles.</div>}
     </div>
   )
 }
@@ -325,18 +326,18 @@ function MessagesTab() {
               <Avatar profile={p} size="sm" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{p.name}</p>
-                <p className="text-xs text-muted-foreground">{p.role === 'parent' ? 'Veli' : p.yearGroup}</p>
+                <p className="text-xs text-muted-foreground">{p.role === 'parent' ? 'Parent' : p.yearGroup}</p>
               </div>
               {count > 0 && <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center shrink-0">{count}</span>}
             </button>
           )
         })}
-        {nonAdmin.length === 0 && <p className="text-xs text-muted-foreground px-2">Kullanıcı yok.</p>}
+        {nonAdmin.length === 0 && <p className="text-xs text-muted-foreground px-2">No users.</p>}
       </div>
 
       <div className="flex-1 oak-card flex flex-col overflow-hidden">
         {!selected ? (
-          <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">Bir kullanıcı seç</div>
+          <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">Select a user</div>
         ) : (
           <>
             <div className="flex items-center gap-2.5 px-4 py-3 border-b border-border">
@@ -344,7 +345,7 @@ function MessagesTab() {
               <p className="text-sm font-semibold text-foreground">{selected.name}</p>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {msgs.length === 0 && <p className="text-center text-xs text-muted-foreground">Henüz mesaj yok.</p>}
+              {msgs.length === 0 && <p className="text-center text-xs text-muted-foreground">No messages yet.</p>}
               {msgs.map((m) => {
                 const isAdmin = m.fromId === ADMIN_ID
                 return (
@@ -352,7 +353,7 @@ function MessagesTab() {
                     <div className={cn('max-w-[75%] px-3.5 py-2 rounded-2xl text-sm', isAdmin ? 'bg-primary text-primary-foreground rounded-br-sm' : 'bg-muted text-foreground rounded-bl-sm border border-border')}>
                       <p>{m.text}</p>
                       <p className={cn('text-xs mt-1', isAdmin ? 'text-primary-foreground/60' : 'text-muted-foreground')}>
-                        {new Date(m.sentAt).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(m.sentAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                   </div>
@@ -360,7 +361,7 @@ function MessagesTab() {
               })}
             </div>
             <div className="px-4 py-3 border-t border-border flex gap-2">
-              <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send()} placeholder={`${selected.name}'e yaz...`} className={inp} />
+              <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && send()} placeholder={`Message ${selected.name}...`} className={inp} />
               <button onClick={send} className="w-9 h-9 flex items-center justify-center bg-primary text-primary-foreground rounded-xl hover:opacity-90 shrink-0"><Send className="w-3.5 h-3.5" /></button>
             </div>
           </>
@@ -371,58 +372,52 @@ function MessagesTab() {
 }
 
 // ── Admin shell ───────────────────────────────────────────────────────────────
-const TABS = [
-  { id: 'requests', icon: ClipboardList, label: 'İstekler' },
-  { id: 'users',    icon: Users,         label: 'Üyeler' },
-  { id: 'families', icon: GitBranch,     label: 'Aileler' },
-  { id: 'messages', icon: MessageSquare, label: 'Mesajlar' },
-] as const
-
-type TabId = typeof TABS[number]['id']
+type TabId = 'requests' | 'users' | 'families' | 'messages'
 
 export function AdminPanel() {
   const navigate = useNavigate()
   const { setAdminSession, registrationRequests } = useAppStore()
+  const { t } = useLang()
   const [tab, setTab] = useState<TabId>('requests')
 
   const pendingCount = registrationRequests.filter((r) => r.status === 'pending').length
 
-  function logout() {
-    setAdminSession(false)
-    navigate('/')
-  }
+  const TABS = [
+    { id: 'requests' as TabId, icon: ClipboardList, label: t('admin.tabs.requests') },
+    { id: 'users'    as TabId, icon: Users,         label: t('admin.tabs.users') },
+    { id: 'families' as TabId, icon: GitBranch,     label: t('admin.tabs.families') },
+    { id: 'messages' as TabId, icon: MessageSquare, label: t('admin.tabs.messages') },
+  ]
+
+  function logout() { setAdminSession(false); navigate('/') }
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Admin topbar */}
       <header className="h-14 border-b border-border bg-card flex items-center justify-between px-6 sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-sm font-display">A</span>
           </div>
-          <span className="font-display font-semibold italic text-foreground">Admin Panel</span>
+          <span className="font-display font-semibold italic text-foreground">{t('admin.title')}</span>
         </div>
         <button onClick={logout} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors">
-          <LogOut className="w-4 h-4" /> Çıkış
+          <LogOut className="w-4 h-4" /> {t('admin.signOut')}
         </button>
       </header>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Tabs */}
         <div className="flex gap-1 bg-muted p-1 rounded-xl w-fit mb-8">
           {TABS.map(({ id, icon: Icon, label }) => (
             <button key={id} onClick={() => setTab(id)}
               className={cn('flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors relative',
                 tab === id ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
-              <Icon className="w-4 h-4" />
-              {label}
+              <Icon className="w-4 h-4" /> {label}
               {id === 'requests' && pendingCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-white text-xs flex items-center justify-center">{pendingCount}</span>
               )}
             </button>
           ))}
         </div>
-
         {tab === 'requests' && <RequestsTab />}
         {tab === 'users'    && <UsersTab />}
         {tab === 'families' && <FamiliesTab />}

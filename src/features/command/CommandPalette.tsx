@@ -1,25 +1,17 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import {
-  Command, CommandEmpty, CommandGroup, CommandInput,
-  CommandItem, CommandList, CommandSeparator, CommandShortcut,
-} from '@/components/ui/command'
-import {
-  LayoutDashboard, Users, ClipboardList, FileText,
-  BookOpen, BarChart3, MessageSquare, Settings,
-  Plus, LogOut,
-} from 'lucide-react'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '@/components/ui/command'
+import { LayoutDashboard, Users, ClipboardList, FileText, BookOpen, BarChart3, MessageSquare, Settings, Plus, LogOut } from 'lucide-react'
 import { useAppStore } from '@/state/store'
+import { useLang } from '@/lib/useLang'
 
-interface CommandPaletteProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
+interface CommandPaletteProps { open: boolean; onOpenChange: (open: boolean) => void }
 
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const navigate = useNavigate()
   const { profiles, activeProfileId, activeChildId, setActiveProfile, setActiveChild } = useAppStore()
+  const { t } = useLang()
 
   const activeProfile = profiles.find((p) => p.id === activeProfileId)
   const isParent = activeProfile?.role === 'parent'
@@ -28,56 +20,43 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        onOpenChange(true)
-      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); onOpenChange(true) }
     }
     document.addEventListener('keydown', handleKey)
     return () => document.removeEventListener('keydown', handleKey)
   }, [onOpenChange])
 
-  function run(to: string) {
-    navigate(to)
-    onOpenChange(false)
-  }
-
-  function logout() {
-    setActiveProfile(null)
-    navigate('/')
-    onOpenChange(false)
-  }
+  function run(to: string) { navigate(to); onOpenChange(false) }
+  function logout() { setActiveProfile(null); navigate('/'); onOpenChange(false) }
 
   const NAV = isParent ? [
-    { label: 'Aile Merkezi',      icon: LayoutDashboard, to: '/app/dashboard' },
-    { label: 'Çocuklar',          icon: Users,            to: '/app/children' },
-    { label: 'Sınavlar',          icon: ClipboardList,    to: '/app/quizzes' },
-    { label: 'Ödevler',           icon: FileText,         to: '/app/homework' },
-    { label: 'Dersler',           icon: BookOpen,         to: '/app/subjects' },
-    { label: 'Raporlar',          icon: BarChart3,        to: '/app/reports' },
-    { label: 'Mesajlar',          icon: MessageSquare,    to: '/app/messages' },
-    { label: 'Ayarlar',           icon: Settings,         to: '/app/settings' },
+    { label: t('nav.familyHub'),   icon: LayoutDashboard, to: '/app/dashboard' },
+    { label: t('nav.children'),    icon: Users,            to: '/app/children' },
+    { label: t('nav.quizzes'),     icon: ClipboardList,    to: '/app/quizzes' },
+    { label: t('nav.homework'),    icon: FileText,         to: '/app/homework' },
+    { label: t('nav.subjects'),    icon: BookOpen,         to: '/app/subjects' },
+    { label: t('nav.reports'),     icon: BarChart3,        to: '/app/reports' },
+    { label: t('nav.messages'),    icon: MessageSquare,    to: '/app/messages' },
+    { label: t('nav.settings'),    icon: Settings,         to: '/app/settings' },
   ] : [
-    { label: 'Bugün',             icon: LayoutDashboard,  to: '/app/dashboard' },
-    { label: 'Sınavlarım',        icon: ClipboardList,    to: '/app/quizzes' },
-    { label: 'Ödevlerim',         icon: FileText,         to: '/app/homework' },
-    { label: 'Derslerim',         icon: BookOpen,         to: '/app/subjects' },
-    { label: 'Sonuçlarım',        icon: BarChart3,        to: '/app/reports' },
+    { label: t('nav.today'),          icon: LayoutDashboard, to: '/app/dashboard' },
+    { label: t('nav.myAssessments'), icon: ClipboardList,   to: '/app/quizzes' },
+    { label: t('nav.myAssignments'), icon: FileText,        to: '/app/homework' },
+    { label: t('nav.mySubjects'),    icon: BookOpen,        to: '/app/subjects' },
+    { label: t('nav.myProgress'),    icon: BarChart3,       to: '/app/reports' },
   ]
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="p-0 max-w-lg overflow-hidden">
         <Command className="rounded-lg">
-          <CommandInput placeholder="Sayfa, çocuk veya komut ara..." />
+          <CommandInput placeholder={t('cmd.placeholder')} />
           <CommandList>
-            <CommandEmpty>Sonuç bulunamadı.</CommandEmpty>
-
-            <CommandGroup heading="Sayfalar">
+            <CommandEmpty>{t('cmd.noResults')}</CommandEmpty>
+            <CommandGroup heading={t('cmd.pages')}>
               {NAV.map(({ label, icon: Icon, to }) => (
                 <CommandItem key={to} onSelect={() => run(to)}>
-                  <Icon className="mr-2 h-4 w-4" />
-                  {label}
+                  <Icon className="mr-2 h-4 w-4" /> {label}
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -85,14 +64,14 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             {isParent && children.length > 0 && (
               <>
                 <CommandSeparator />
-                <CommandGroup heading="Çocuğu Seç">
+                <CommandGroup heading={t('cmd.learners')}>
                   {children.map((c) => c && (
                     <CommandItem key={c.id} onSelect={() => { setActiveChild(c.id); run('/app/dashboard') }}>
                       <span className="mr-2 text-sm font-semibold w-4 h-4 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">
                         {c.name[0]}
                       </span>
                       {c.name} <span className="ml-1 text-muted-foreground text-xs">{c.yearGroup}</span>
-                      {activeChildId === c.id && <CommandShortcut>Aktif</CommandShortcut>}
+                      {activeChildId === c.id && <CommandShortcut>{t('cmd.active')}</CommandShortcut>}
                     </CommandItem>
                   ))}
                 </CommandGroup>
@@ -102,15 +81,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             {isParent && (
               <>
                 <CommandSeparator />
-                <CommandGroup heading="Hızlı Eylemler">
+                <CommandGroup heading={t('cmd.actions')}>
                   <CommandItem onSelect={() => run('/app/quizzes/new')}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Yeni Sınav Oluştur
-                    <CommandShortcut>⌘N</CommandShortcut>
+                    <Plus className="mr-2 h-4 w-4" /> {t('cmd.newAssessment')}
+                    <CommandShortcut>{t('cmd.newAssessmentShortcut')}</CommandShortcut>
                   </CommandItem>
                   <CommandItem onSelect={() => run('/app/settings')}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Profil Düzenle
+                    <Settings className="mr-2 h-4 w-4" /> {t('cmd.editProfile')}
                   </CommandItem>
                 </CommandGroup>
               </>
@@ -119,8 +96,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             <CommandSeparator />
             <CommandGroup>
               <CommandItem onSelect={logout} className="text-destructive data-[selected]:text-destructive">
-                <LogOut className="mr-2 h-4 w-4" />
-                Çıkış Yap
+                <LogOut className="mr-2 h-4 w-4" /> {t('cmd.signOut')}
               </CommandItem>
             </CommandGroup>
           </CommandList>
