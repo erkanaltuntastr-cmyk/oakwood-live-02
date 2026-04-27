@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Profile, QuizDraft, QuizSession, RegistrationRequest, InviteCode, AdminMessage } from '@/types'
 import type { HomeworkItem } from '@/lib/homeworkService'
+import type { Lang } from '@/lib/i18n'
 import { DEMO_PROFILES, DEMO_MESSAGES, DEMO_THREADS } from './demoData'
 export type { Profile }
 
@@ -27,6 +28,7 @@ export const ADMIN_PIN = '1453'
 export const ADMIN_ID  = 'admin'
 
 interface AppState {
+  lang: Lang
   profiles: Profile[]
   activeProfileId: string | null
   activeChildId: string | null
@@ -40,6 +42,7 @@ interface AppState {
   inviteCodes: InviteCode[]
   adminMessages: AdminMessage[]
 
+  setLang:               (lang: Lang) => void
   setActiveProfile:      (id: string | null) => void
   setActiveChild:        (id: string | null) => void
   setAdminSession:       (on: boolean) => void
@@ -71,6 +74,7 @@ interface AppState {
 }
 
 const EMPTY_STATE = {
+  lang: 'en' as Lang,
   profiles: [] as Profile[],
   activeProfileId: null as string | null,
   activeChildId: null as string | null,
@@ -90,6 +94,7 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       ...EMPTY_STATE,
 
+      setLang: (lang) => set({ lang }),
       setActiveProfile: (id) => set({ activeProfileId: id, activeChildId: null }),
       setActiveChild:   (id) => set({ activeChildId: id }),
       setAdminSession:  (on) => set({ isAdminSession: on }),
@@ -239,6 +244,6 @@ export const useAppStore = create<AppState>()(
       // Full reset
       resetAll: () => set({ ...EMPTY_STATE }),
     }),
-    { name: 'oakwood-v4' }   // v4: admin + registration requests + invite codes
+    { name: 'oakwood-v5' }   // v5: i18n (lang field)
   )
 )

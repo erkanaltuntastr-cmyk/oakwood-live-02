@@ -6,35 +6,39 @@ import {
 } from 'lucide-react'
 import { useAppStore } from '@/state/store'
 import { Avatar } from '@/components/Avatar'
+import { useLang } from '@/lib/useLang'
 import { cn } from '@/lib/utils'
-
-const parentNav = [
-  { to: '/app/dashboard', icon: LayoutDashboard, label: 'Aile Merkezi' },
-  { to: '/app/children',  icon: Users,           label: 'Çocuklar' },
-  { to: '/app/subjects',  icon: BookOpen,         label: 'Dersler' },
-  { to: '/app/quizzes',   icon: ClipboardList,    label: 'Sınavlar' },
-  { to: '/app/homework',  icon: FileText,         label: 'Ödevler' },
-  { to: '/app/reports',   icon: BarChart3,        label: 'Raporlar' },
-  { to: '/app/messages',  icon: MessageSquare,    label: 'Mesajlar' },
-]
-
-const childNav = [
-  { to: '/app/dashboard', icon: LayoutDashboard, label: 'Bugün' },
-  { to: '/app/quizzes',   icon: ClipboardList,   label: 'Sınavlarım' },
-  { to: '/app/homework',  icon: FileText,        label: 'Ödevlerim' },
-  { to: '/app/subjects',  icon: BookOpen,        label: 'Derslerim' },
-  { to: '/app/reports',   icon: BarChart3,       label: 'Sonuçlarım' },
-]
 
 export function Sidebar() {
   const { profiles, activeProfileId, activeChildId, setActiveProfile } = useAppStore()
   const navigate = useNavigate()
+  const { t } = useLang()
+
   const profile  = profiles.find((p) => p.id === activeProfileId)
   const isParent = profile?.role === 'parent'
-  const nav      = isParent ? parentNav : childNav
   const activeChild = isParent && activeChildId
     ? profiles.find((p) => p.id === activeChildId)
     : null
+
+  const parentNav = [
+    { to: '/app/dashboard', icon: LayoutDashboard, label: t('nav.familyHub') },
+    { to: '/app/children',  icon: Users,           label: t('nav.children') },
+    { to: '/app/subjects',  icon: BookOpen,         label: t('nav.subjects') },
+    { to: '/app/quizzes',   icon: ClipboardList,    label: t('nav.quizzes') },
+    { to: '/app/homework',  icon: FileText,         label: t('nav.homework') },
+    { to: '/app/reports',   icon: BarChart3,        label: t('nav.reports') },
+    { to: '/app/messages',  icon: MessageSquare,    label: t('nav.messages') },
+  ]
+
+  const childNav = [
+    { to: '/app/dashboard', icon: LayoutDashboard, label: t('nav.today') },
+    { to: '/app/quizzes',   icon: ClipboardList,   label: t('nav.myAssessments') },
+    { to: '/app/homework',  icon: FileText,        label: t('nav.myAssignments') },
+    { to: '/app/subjects',  icon: BookOpen,        label: t('nav.mySubjects') },
+    { to: '/app/reports',   icon: BarChart3,       label: t('nav.myProgress') },
+  ]
+
+  const nav = isParent ? parentNav : childNav
 
   return (
     <aside className="w-60 flex flex-col shrink-0 border-r border-border bg-white h-full">
@@ -54,7 +58,7 @@ export function Sidebar() {
           <Avatar profile={profile} size="sm" />
           <div className="min-w-0">
             <p className="text-sm font-semibold text-foreground truncate">{profile.name}</p>
-            <p className="text-xs text-muted-foreground">{isParent ? 'Veli' : 'Çocuk'}</p>
+            <p className="text-xs text-muted-foreground">{isParent ? t('nav.parent') : t('nav.student')}</p>
           </div>
         </div>
       )}
@@ -71,11 +75,11 @@ export function Sidebar() {
                 <Avatar profile={activeChild} size="sm" />
                 <div className="text-left">
                   <p className="text-xs font-semibold text-foreground leading-none">{activeChild.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Seçili çocuk</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t('nav.selectedLearner')}</p>
                 </div>
               </>
             ) : (
-              <p className="text-xs text-muted-foreground">Çocuk seçilmedi</p>
+              <p className="text-xs text-muted-foreground">{t('nav.noLearner')}</p>
             )}
           </div>
           <ChevronRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
@@ -88,9 +92,7 @@ export function Sidebar() {
           <NavLink
             key={to}
             to={to}
-            className={({ isActive }) =>
-              cn('oak-nav-item', isActive && 'active')
-            }
+            className={({ isActive }) => cn('oak-nav-item', isActive && 'active')}
           >
             <Icon className="w-4 h-4 shrink-0" />
             {label}
@@ -100,17 +102,14 @@ export function Sidebar() {
 
       {/* Bottom */}
       <div className="p-3 border-t border-border space-y-0.5">
-        <NavLink
-          to="/app/settings"
-          className={({ isActive }) => cn('oak-nav-item', isActive && 'active')}
-        >
-          <Settings className="w-4 h-4" /> Ayarlar
+        <NavLink to="/app/settings" className={({ isActive }) => cn('oak-nav-item', isActive && 'active')}>
+          <Settings className="w-4 h-4" /> {t('nav.settings')}
         </NavLink>
         <button
           onClick={() => { setActiveProfile(null); navigate('/') }}
           className="w-full oak-nav-item text-left hover:!text-destructive hover:!bg-destructive/5"
         >
-          <LogOut className="w-4 h-4" /> Çıkış
+          <LogOut className="w-4 h-4" /> {t('nav.signOut')}
         </button>
       </div>
     </aside>

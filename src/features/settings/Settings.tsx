@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useAppStore } from '@/state/store'
 import { Avatar, getColor } from '@/components/Avatar'
 import { crypto } from '@/lib/crypto'
+import { useLang } from '@/lib/useLang'
+import { LANGUAGES, type Lang } from '@/lib/i18n'
 import type { Profile } from '@/types'
-import { Pencil, Trash2, Plus, X, Check } from 'lucide-react'
+import { Pencil, Trash2, Plus, X, Check, Globe } from 'lucide-react'
 
 const YEAR_GROUPS = Array.from({ length: 13 }, (_, i) => `Year ${i + 1}`)
 
@@ -389,7 +391,8 @@ function AddParentForm({ onDone }: { onDone: () => void }) {
 
 // ── Settings page ──────────────────────────────────────────────────────────
 export function Settings() {
-  const { profiles, activeProfileId } = useAppStore()
+  const { profiles, activeProfileId, lang, setLang } = useAppStore()
+  const { t } = useLang()
   const [addingChild, setAddingChild] = useState(false)
   const [addingParent, setAddingParent] = useState(false)
 
@@ -403,18 +406,41 @@ export function Settings() {
   return (
     <div className="max-w-2xl space-y-10">
       <div>
-        <h1 className="text-2xl font-display font-semibold italic text-foreground">Ayarlar</h1>
-        <p className="text-muted-foreground text-sm mt-1">Profilleri düzenle, PIN'leri güncelle.</p>
+        <h1 className="text-2xl font-display font-semibold italic text-foreground">{t('settings.title')}</h1>
+        <p className="text-muted-foreground text-sm mt-1">{t('settings.subtitle')}</p>
       </div>
+
+      {/* Language selector */}
+      <section className="oak-card p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <Globe className="w-4 h-4 text-muted-foreground" />
+          <h2 className="text-base font-semibold text-foreground">{t('settings.language')}</h2>
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">{t('settings.languageLabel')}</p>
+        <div className="flex gap-3 flex-wrap">
+          {LANGUAGES.map((l) => (
+            <button key={l.code} onClick={() => setLang(l.code as Lang)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
+                lang === l.code
+                  ? 'border-primary bg-accent text-primary'
+                  : 'border-border text-muted-foreground hover:border-primary/30 hover:text-foreground'
+              }`}>
+              <span className="text-base">{l.flag}</span>
+              {l.label}
+              {lang === l.code && <Check className="w-3.5 h-3.5" />}
+            </button>
+          ))}
+        </div>
+      </section>
 
       {/* Parents section */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-foreground">Veliler</h2>
+          <h2 className="text-base font-semibold text-foreground">{t('settings.parents')}</h2>
           {!addingParent && (
             <button onClick={() => setAddingParent(true)}
               className="flex items-center gap-1.5 text-sm text-primary hover:opacity-80 font-medium transition-opacity">
-              <Plus className="w-4 h-4" /> Veli Ekle
+              <Plus className="w-4 h-4" /> {t('settings.addParent')}
             </button>
           )}
         </div>
@@ -426,11 +452,11 @@ export function Settings() {
       {isParent && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-foreground">Çocuklar</h2>
+            <h2 className="text-base font-semibold text-foreground">{t('settings.learners')}</h2>
             {!addingChild && (
               <button onClick={() => setAddingChild(true)}
                 className="flex items-center gap-1.5 text-sm text-primary hover:opacity-80 font-medium transition-opacity">
-                <Plus className="w-4 h-4" /> Çocuk Ekle
+                <Plus className="w-4 h-4" /> {t('settings.addLearner')}
               </button>
             )}
           </div>
@@ -440,7 +466,7 @@ export function Settings() {
           )}
           {children.length === 0 && !addingChild && (
             <div className="oak-card p-8 text-center text-muted-foreground text-sm">
-              Henüz çocuk eklenmemiş.
+              {t('settings.noLearners')}
             </div>
           )}
         </section>
