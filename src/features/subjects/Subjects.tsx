@@ -2,7 +2,8 @@ import { useAppStore } from '@/state/store'
 import { SUBJECTS } from '@/lib/quizService'
 import { useLang } from '@/lib/useLang'
 import { cn } from '@/lib/utils'
-import { BookOpen, Plus, X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
+import { OakwoodAssetIcon } from '@/components/brand/OakwoodAssetIcon'
 
 export function Subjects() {
   const { profiles, activeChildId, updateProfile } = useAppStore()
@@ -34,7 +35,10 @@ export function Subjects() {
   return (
     <div className="max-w-2xl space-y-8">
       <div>
-        <h1 className="text-2xl font-display font-semibold text-foreground italic">{t('subjects.title')}</h1>
+        <div className="flex items-center gap-3">
+          <OakwoodAssetIcon type="lessons" className="h-9 w-9" size={36} alt="Lessons icon" />
+          <h1 className="text-2xl font-display font-semibold text-foreground italic">{t('subjects.title')}</h1>
+        </div>
         <p className="text-muted-foreground mt-1 text-sm">{t('subjects.subtitle', { name: child.name })}</p>
       </div>
 
@@ -46,7 +50,7 @@ export function Subjects() {
             <div key={name} className={cn('oak-card flex items-center justify-between px-4 py-3 transition-opacity', !active && 'opacity-50')}>
               <div className="flex items-center gap-3">
                 <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', active ? 'bg-accent' : 'bg-muted')}>
-                  <BookOpen className={cn('w-4 h-4', active ? 'text-primary' : 'text-muted-foreground')} />
+                  <OakwoodAssetIcon type="lessons" className="w-5 h-5" size={20} alt="Lessons icon" />
                 </div>
                 <span className="text-sm font-medium text-foreground">{name}</span>
               </div>

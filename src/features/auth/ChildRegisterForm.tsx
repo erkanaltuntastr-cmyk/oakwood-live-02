@@ -181,10 +181,11 @@ export function ChildRegisterForm({ onSubmit, onCancel }: ChildRegisterFormProps
             <div>
               <Label text="Cinsiyet" optional />
               <select className={inp} value={form.gender} onChange={(e) => set('gender', e.target.value)}>
-                <option value="">Belirtmek istemiyorum</option>
-                <option value="female">Kız</option>
-                <option value="male">Erkek</option>
+                <option value="">—</option>
+                <option value="female">Female / Girl</option>
+                <option value="male">Male / Boy</option>
                 <option value="nonbinary">Non-binary</option>
+                <option value="prefer-not">Prefer not to say</option>
               </select>
             </div>
           </div>

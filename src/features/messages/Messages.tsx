@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { useAppStore } from '@/state/store'
 import { Avatar } from '@/components/Avatar'
 import { useLang } from '@/lib/useLang'
-import { Send, MessageSquare, Plus, Users } from 'lucide-react'
+import { Send, Plus } from 'lucide-react'
 import { crypto } from '@/lib/crypto'
 import { cn } from '@/lib/utils'
 import type { NoteThread } from '@/state/store'
+import { OakwoodAssetIcon, type OakwoodAssetIconType } from '@/components/brand/OakwoodAssetIcon'
 
 const inp = 'w-full px-3 py-2 text-sm border border-border rounded-xl bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40'
 
@@ -45,7 +46,7 @@ function DirectMessages() {
           const count = unread(p.id)
           return (
             <button key={p.id} onClick={() => handleSelect(p.id)}
-              className={cn('w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-colors',
+              className={cn('w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-colors',
                 selectedId === p.id ? 'bg-accent text-primary' : 'hover:bg-muted text-foreground')}>
               <Avatar profile={p} size="sm" />
               <div className="flex-1 min-w-0">
@@ -64,7 +65,7 @@ function DirectMessages() {
           <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">{t('msg.selectContact')}</div>
         ) : (
           <>
-            <div className="flex items-center gap-2.5 px-4 py-3 border-b border-border">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
               <Avatar profile={selected} size="sm" />
               <p className="text-sm font-semibold text-foreground">{selected.name}</p>
             </div>
@@ -152,7 +153,7 @@ function SharedNotes() {
               <p className="text-sm text-foreground line-clamp-1">{t_.replies[0]?.text}</p>
               <p className="text-xs text-muted-foreground mt-1">{t_.replies.length} notes · {new Date(t_.createdAt).toLocaleDateString('en-GB')}</p>
             </div>
-            <MessageSquare className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+            <OakwoodAssetIcon type="messages" className="w-5 h-5 shrink-0 mt-0.5" size={20} alt="Messages icon" />
           </button>
 
           {openId === t_.id && (
@@ -193,14 +194,17 @@ export function Messages() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-semibold italic text-foreground">{t('msg.title')}</h1>
+        <div className="flex items-center gap-3">
+          <OakwoodAssetIcon type="messages" className="h-9 w-9" size={36} alt="Messages icon" />
+          <h1 className="text-2xl font-display font-semibold italic text-foreground">{t('msg.title')}</h1>
+        </div>
         <p className="text-muted-foreground mt-1 text-sm">{t('msg.subtitle')}</p>
       </div>
       <div className="flex gap-1 bg-muted p-1 rounded-xl w-fit">
-        {[{ id: 'direct', icon: Users, label: t('msg.direct') }, { id: 'notes', icon: MessageSquare, label: t('msg.notes') }].map(({ id, icon: Icon, label }) => (
+        {[{ id: 'direct', icon: 'family-hub', label: t('msg.direct') }, { id: 'notes', icon: 'messages', label: t('msg.notes') }].map(({ id, icon, label }) => (
           <button key={id} onClick={() => setTab(id as 'direct' | 'notes')}
             className={cn('flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors', tab === id ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}>
-            <Icon className="w-4 h-4" /> {label}
+            <OakwoodAssetIcon type={icon as OakwoodAssetIconType} className="w-5 h-5" size={20} alt={`${label} icon`} /> {label}
           </button>
         ))}
       </div>

@@ -2,9 +2,11 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator, CommandShortcut } from '@/components/ui/command'
-import { LayoutDashboard, Users, ClipboardList, FileText, BookOpen, BarChart3, MessageSquare, Settings, Plus, LogOut } from 'lucide-react'
+import { Plus, LogOut } from 'lucide-react'
 import { useAppStore } from '@/state/store'
 import { useLang } from '@/lib/useLang'
+import { Avatar } from '@/components/Avatar'
+import { OakwoodAssetIcon, type OakwoodAssetIconType } from '@/components/brand/OakwoodAssetIcon'
 
 interface CommandPaletteProps { open: boolean; onOpenChange: (open: boolean) => void }
 
@@ -30,20 +32,20 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   function logout() { setActiveProfile(null); navigate('/'); onOpenChange(false) }
 
   const NAV = isParent ? [
-    { label: t('nav.familyHub'),   icon: LayoutDashboard, to: '/app/dashboard' },
-    { label: t('nav.children'),    icon: Users,            to: '/app/children' },
-    { label: t('nav.quizzes'),     icon: ClipboardList,    to: '/app/quizzes' },
-    { label: t('nav.homework'),    icon: FileText,         to: '/app/homework' },
-    { label: t('nav.subjects'),    icon: BookOpen,         to: '/app/subjects' },
-    { label: t('nav.reports'),     icon: BarChart3,        to: '/app/reports' },
-    { label: t('nav.messages'),    icon: MessageSquare,    to: '/app/messages' },
-    { label: t('nav.settings'),    icon: Settings,         to: '/app/settings' },
+    { label: t('nav.familyHub'),   icon: 'family-hub', to: '/app/dashboard' },
+    { label: t('nav.children'),    icon: 'family-hub', to: '/app/children' },
+    { label: t('nav.quizzes'),     icon: 'quiz',       to: '/app/quizzes' },
+    { label: t('nav.homework'),    icon: 'homework',   to: '/app/homework' },
+    { label: t('nav.subjects'),    icon: 'lessons',    to: '/app/subjects' },
+    { label: t('nav.reports'),     icon: 'report',     to: '/app/reports' },
+    { label: t('nav.messages'),    icon: 'messages',   to: '/app/messages' },
+    { label: t('nav.settings'),    icon: 'settings',   to: '/app/settings' },
   ] : [
-    { label: t('nav.today'),          icon: LayoutDashboard, to: '/app/dashboard' },
-    { label: t('nav.myAssessments'), icon: ClipboardList,   to: '/app/quizzes' },
-    { label: t('nav.myAssignments'), icon: FileText,        to: '/app/homework' },
-    { label: t('nav.mySubjects'),    icon: BookOpen,        to: '/app/subjects' },
-    { label: t('nav.myProgress'),    icon: BarChart3,       to: '/app/reports' },
+    { label: t('nav.today'),          icon: 'family-hub', to: '/app/dashboard' },
+    { label: t('nav.myAssessments'), icon: 'quiz',       to: '/app/quizzes' },
+    { label: t('nav.myAssignments'), icon: 'homework',   to: '/app/homework' },
+    { label: t('nav.mySubjects'),    icon: 'lessons',    to: '/app/subjects' },
+    { label: t('nav.myProgress'),    icon: 'report',     to: '/app/reports' },
   ]
 
   return (
@@ -54,9 +56,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           <CommandList>
             <CommandEmpty>{t('cmd.noResults')}</CommandEmpty>
             <CommandGroup heading={t('cmd.pages')}>
-              {NAV.map(({ label, icon: Icon, to }) => (
+              {NAV.map(({ label, icon, to }) => (
                 <CommandItem key={to} onSelect={() => run(to)}>
-                  <Icon className="mr-2 h-4 w-4" /> {label}
+                  <OakwoodAssetIcon type={icon as OakwoodAssetIconType} className="mr-2 h-4 w-4" size={18} alt={`${label} icon`} /> {label}
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -67,9 +69,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                 <CommandGroup heading={t('cmd.learners')}>
                   {children.map((c) => c && (
                     <CommandItem key={c.id} onSelect={() => { setActiveChild(c.id); run('/app/dashboard') }}>
-                      <span className="mr-2 text-sm font-semibold w-4 h-4 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs">
-                        {c.name[0]}
-                      </span>
+                      <Avatar profile={c} size="sm" className="mr-2" />
                       {c.name} <span className="ml-1 text-muted-foreground text-xs">{c.yearGroup}</span>
                       {activeChildId === c.id && <CommandShortcut>{t('cmd.active')}</CommandShortcut>}
                     </CommandItem>
@@ -87,7 +87,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                     <CommandShortcut>{t('cmd.newAssessmentShortcut')}</CommandShortcut>
                   </CommandItem>
                   <CommandItem onSelect={() => run('/app/settings')}>
-                    <Settings className="mr-2 h-4 w-4" /> {t('cmd.editProfile')}
+                    <OakwoodAssetIcon type="settings" className="mr-2 h-4 w-4" size={18} alt="Settings icon" /> {t('cmd.editProfile')}
                   </CommandItem>
                 </CommandGroup>
               </>

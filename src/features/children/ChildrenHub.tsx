@@ -2,8 +2,9 @@ import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/state/store'
 import { Avatar } from '@/components/Avatar'
 import { useLang } from '@/lib/useLang'
-import { ClipboardList, FileText, TrendingUp, ChevronRight } from 'lucide-react'
+import { TrendingUp, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { OakwoodAssetIcon } from '@/components/brand/OakwoodAssetIcon'
 
 const MOCK_SUMMARY: Record<string, { quizzes: number; homework: number; avg: number }> = {
   c1: { quizzes: 4, homework: 2, avg: 85 },
@@ -21,29 +22,27 @@ function ChildCard({ childId, isActive, onSelect }: { childId: string; isActive:
 
   return (
     <button onClick={onSelect}
-      className={cn('w-full text-left rounded-2xl border p-5 transition-all duration-150 hover:shadow-card-md group',
+      className={cn('group w-full rounded-3xl border p-6 text-center transition-all duration-150 hover:shadow-card-md',
         isActive ? 'border-primary bg-accent/20 shadow-card' : 'border-border bg-card hover:border-primary/40')}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <Avatar profile={child} size="lg" />
-          <div>
+      <div className="relative flex flex-col items-center">
+        <Avatar profile={child} size="xl" />
+        <div className="mt-4">
             <p className="font-semibold text-foreground text-base">{child.name} {child.surname}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{child.yearGroup} {child.school ? `· ${child.school}` : ''}</p>
             {isActive && <span className="text-xs text-primary font-medium">{t('children.selected')}</span>}
-          </div>
         </div>
-        <ChevronRight className={cn('w-4 h-4 mt-1 shrink-0 transition-colors', isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} />
+        <ChevronRight className={cn('absolute right-0 top-0 h-4 w-4 transition-colors', isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} />
       </div>
-      <div className="mt-4 flex gap-4">
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <ClipboardList className="w-3.5 h-3.5" />
+      <div className="mt-5 flex flex-wrap justify-center gap-3">
+        <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+          <OakwoodAssetIcon type="quiz" className="w-4 h-4" size={16} alt="Quiz icon" />
           <span>{t('children.assessments', { n: summary.quizzes })}</span>
         </div>
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <FileText className="w-3.5 h-3.5" />
+        <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+          <OakwoodAssetIcon type="homework" className="w-4 h-4" size={16} alt="Homework icon" />
           <span>{t('children.assignments', { n: summary.homework })}</span>
         </div>
-        <div className={cn('flex items-center gap-1.5 text-sm font-medium', avgColor)}>
+        <div className={cn('flex items-center justify-center gap-1.5 text-sm font-medium', avgColor)}>
           <TrendingUp className="w-3.5 h-3.5" />
           <span>{t('children.average', { n: summary.avg })}</span>
         </div>
@@ -71,7 +70,7 @@ export function ChildrenHub() {
       {childIds.length === 0 ? (
         <div className="oak-card p-10 text-center text-muted-foreground text-sm">{t('children.empty')}</div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]">
           {childIds.map((id) => (
             <ChildCard key={id} childId={id} isActive={id === activeChildId} onSelect={() => handleSelect(id)} />
           ))}

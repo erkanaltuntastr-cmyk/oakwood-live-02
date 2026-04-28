@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/state/store'
 import { useLang } from '@/lib/useLang'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
+import { OakwoodLogo } from '@/components/brand/OakwoodLogo'
+import { OakwoodAssetIcon } from '@/components/brand/OakwoodAssetIcon'
 
 const inp = 'w-full px-4 py-3 text-sm border border-border rounded-xl bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors'
 
@@ -36,19 +38,22 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen oak-bg-family flex flex-col">
       <div className="flex items-center justify-between px-6 py-5 border-b border-border">
         <button onClick={() => navigate('/')} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-4 h-4" /> {t('auth.back')}
         </button>
-        <h1 className="font-display font-semibold italic text-foreground text-lg">{t('app.name')}</h1>
+        <OakwoodLogo imageClassName="h-9 w-9" />
         <div className="w-16" />
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
           <div className="mb-8">
-            <h2 className="text-2xl font-display font-semibold italic text-foreground">{t('auth.signIn')}</h2>
+            <div className="flex items-center gap-3">
+              <OakwoodAssetIcon type="pin" className="h-9 w-9" size={36} alt="Pin icon" />
+              <h2 className="text-2xl font-display font-semibold italic text-foreground">{t('auth.signIn')}</h2>
+            </div>
             <p className="text-sm text-muted-foreground mt-1">{t('auth.signInSubtitle')}</p>
           </div>
 

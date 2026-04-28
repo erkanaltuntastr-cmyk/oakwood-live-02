@@ -5,6 +5,7 @@ import { Avatar } from '@/components/Avatar'
 import { useLang } from '@/lib/useLang'
 import { cn } from '@/lib/utils'
 import { ArrowLeft, Delete } from 'lucide-react'
+import { OakwoodAssetIcon } from '@/components/brand/OakwoodAssetIcon'
 
 const MAX_ATTEMPTS = 5
 const LOCKOUT_SECONDS = 30
@@ -62,7 +63,7 @@ export function PinEntry() {
   const dots = Array.from({ length: 4 }, (_, i) => i < pin.length)
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-8">
+    <div className="min-h-screen oak-bg-family flex flex-col items-center justify-center p-8">
       <button onClick={() => navigate('/profiles')}
         className="absolute top-6 left-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
         <ArrowLeft className="w-4 h-4" /> {t('auth.back')}
@@ -73,7 +74,10 @@ export function PinEntry() {
           <Avatar profile={profile} size="xl" />
           <div>
             <p className="font-semibold text-lg text-foreground">{profile.name}</p>
-            <p className="text-sm text-muted-foreground mt-0.5">{t('auth.pin')}</p>
+            <p className="mt-0.5 flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+              <OakwoodAssetIcon type="pin" className="h-5 w-5" size={20} alt="Pin icon" />
+              {t('auth.pin')}
+            </p>
           </div>
         </div>
 

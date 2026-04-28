@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils'
 import { useLang } from '@/lib/useLang'
+import { OakwoodAssetIcon } from '@/components/brand/OakwoodAssetIcon'
 
 interface QuizSessionShellProps {
   title: string
@@ -25,7 +26,10 @@ export function QuizSessionShell({ title, currentQ, totalQ, timeLeft, question, 
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
       <div className="flex items-center justify-between">
-        <h1 className="font-semibold text-foreground">{title}</h1>
+        <div className="flex items-center gap-2">
+          <OakwoodAssetIcon type="quiz" className="h-7 w-7" size={28} alt="Quiz icon" />
+          <h1 className="font-semibold text-foreground">{title}</h1>
+        </div>
         <span className="font-mono text-sm bg-muted px-3 py-1 rounded-lg text-muted-foreground">{timeLeft}</span>
       </div>
 
@@ -57,8 +61,13 @@ export function QuizSessionShell({ title, currentQ, totalQ, timeLeft, question, 
         ))}
       </div>
 
-      {hint && <div className="text-sm bg-accent/40 border border-border rounded-xl px-4 py-3 text-muted-foreground">💡 {hint}</div>}
-      {explanation && <div className="text-sm bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-green-800">✅ {explanation}</div>}
+      {hint && (
+        <div className="flex items-start gap-2 text-sm bg-accent/40 border border-border rounded-xl px-4 py-3 text-muted-foreground">
+          <OakwoodAssetIcon type="ai" className="mt-0.5 h-5 w-5 shrink-0" size={20} alt="AI icon" />
+          <span>{hint}</span>
+        </div>
+      )}
+      {explanation && <div className="text-sm bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-green-800">{explanation}</div>}
 
       <div className="flex justify-between">
         <button onClick={onHint} className="oak-btn-ghost">{t('quiz.hint')}</button>

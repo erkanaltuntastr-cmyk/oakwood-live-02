@@ -2,7 +2,8 @@ import { useAppStore } from '@/state/store'
 import { useLang } from '@/lib/useLang'
 import { buildReport } from '@/lib/quizService'
 import { cn } from '@/lib/utils'
-import { TrendingUp, TrendingDown, Minus, ClipboardList, CheckCircle2, XCircle } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, CheckCircle2, XCircle } from 'lucide-react'
+import { OakwoodAssetIcon } from '@/components/brand/OakwoodAssetIcon'
 
 function ScoreRing({ score }: { score: number }) {
   const color = score >= 80 ? 'text-green-600 border-green-400' : score >= 60 ? 'text-amber-500 border-amber-400' : 'text-red-500 border-red-400'
@@ -42,7 +43,10 @@ export function Reports() {
   return (
     <div className="max-w-2xl space-y-8">
       <div>
-        <h1 className="text-2xl font-display font-semibold text-foreground italic">{t('reports.title')}</h1>
+        <div className="flex items-center gap-3">
+          <OakwoodAssetIcon type="report" className="h-9 w-9" size={36} alt="Report icon" />
+          <h1 className="text-2xl font-display font-semibold text-foreground italic">{t('reports.title')}</h1>
+        </div>
         <p className="text-muted-foreground mt-1 text-sm">{t('reports.subtitle')}</p>
       </div>
 
@@ -93,7 +97,7 @@ export function Reports() {
                       <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
                         <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5 text-green-500" />{t('reports.correct', { n: correct })}</span>
                         <span className="flex items-center gap-1"><XCircle className="w-3.5 h-3.5 text-red-400" />{t('reports.wrong', { n: session.questions.length - correct })}</span>
-                        <span className="flex items-center gap-1"><ClipboardList className="w-3.5 h-3.5" />{t('reports.questions', { n: session.questions.length })}</span>
+                        <span className="flex items-center gap-1"><OakwoodAssetIcon type="quiz" className="w-4 h-4" size={16} alt="Quiz icon" />{t('reports.questions', { n: session.questions.length })}</span>
                       </div>
                       {report.strengths.slice(0, 1).map((s) => <p key={s} className="text-xs text-green-700">✓ {s}</p>)}
                       {report.critical.slice(0, 1).map((s) => <p key={s} className="text-xs text-amber-700">⚠ {s}</p>)}

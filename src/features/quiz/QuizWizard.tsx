@@ -5,6 +5,7 @@ import { useAppStore } from '@/state/store'
 import { createSession, defaultConfig, SUBJECTS, SUBJECT_TOPICS } from '@/lib/quizService'
 import type { QuizConfig } from '@/types'
 import { cn } from '@/lib/utils'
+import { OakwoodAssetIcon } from '@/components/brand/OakwoodAssetIcon'
 
 // ── Step 1: Subject + Topic ────────────────────────────────────────────────
 
@@ -30,12 +31,13 @@ function StepSubject({
               key={s}
               onClick={() => { setSubject(s); setTopics([]) }}
               className={cn(
-                'px-3 py-2 rounded-xl text-sm font-medium border transition-colors',
+                'flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors',
                 subject === s
                   ? 'bg-primary text-primary-foreground border-primary'
                   : 'border-border text-muted-foreground hover:bg-muted hover:text-foreground'
               )}
             >
+              <OakwoodAssetIcon type="lessons" className="h-4 w-4" size={16} alt="Lessons icon" />
               {s}
             </button>
           ))}
@@ -213,7 +215,10 @@ export function QuizWizard() {
   return (
     <div className="max-w-2xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-display font-semibold text-foreground">Yeni Sınav</h1>
+        <div className="flex items-center gap-3">
+          <OakwoodAssetIcon type="quiz" className="h-9 w-9" size={36} alt="Quiz icon" />
+          <h1 className="text-2xl font-display font-semibold text-foreground">Yeni Sınav</h1>
+        </div>
         <p className="text-muted-foreground text-sm mt-1">
           {activeChildId
             ? `Seçili çocuk için sınav oluşturuluyor`

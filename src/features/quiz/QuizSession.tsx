@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { QuizSessionShell } from './QuizSessionShell'
 import { useAppStore } from '@/state/store'
 import { checkAnswer } from '@/lib/quizService'
+import { OakwoodAssetIcon } from '@/components/brand/OakwoodAssetIcon'
 
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -114,9 +115,12 @@ export function QuizSession() {
     return (
       <div className="max-w-2xl space-y-6">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex items-center gap-3">
+            <OakwoodAssetIcon type="quiz" className="h-8 w-8" size={32} alt="Quiz icon" />
+            <div>
             <p className="text-xs text-muted-foreground uppercase tracking-wider">{session.subject}</p>
             <h1 className="text-lg font-display font-semibold text-foreground">{question.topic}</h1>
+            </div>
           </div>
           <span className="font-mono text-sm bg-muted px-3 py-1 rounded-lg">{timeDisplay}</span>
         </div>
@@ -150,7 +154,10 @@ export function QuizSession() {
             </button>
             {showHint && (
               <p className="text-xs text-muted-foreground mt-1.5 bg-accent/40 border border-border px-3 py-2 rounded-lg">
-                💡 {question.hint}
+                <span className="flex items-start gap-2">
+                  <OakwoodAssetIcon type="ai" className="mt-0.5 h-4 w-4 shrink-0" size={16} alt="AI icon" />
+                  {question.hint}
+                </span>
               </p>
             )}
           </div>

@@ -53,7 +53,9 @@ export interface Profile {
   gender?: string
   // parent-specific
   childIds?: string[]
-  familyName?: string
+  username?: string
+  spaceName?: string    // name for the family's learning hub/space (replaces familyName)
+  familyName?: string   // kept for backwards compat with demo data
   postcode?: string
   email?: string
   gsm?: string

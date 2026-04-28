@@ -1,9 +1,9 @@
+/* Google Fonts — Inter + Playfair Display */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Google Fonts — Inter + Playfair Display */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
 
 @layer base {
   :root {
@@ -63,6 +63,52 @@
 }
 
 @layer components {
+  .oak-bg-landing {
+    @apply bg-oak-warm;
+    background-image:
+      linear-gradient(180deg, rgba(255, 248, 245, 0.72), rgba(255, 248, 245, 0.84)),
+      url('./assets/brand/backgrounds/family-hub-bg.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .oak-hero-pattern {
+    background-image:
+      url("data:image/svg+xml,%3Csvg width='760' height='520' viewBox='0 0 760 520' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M42 406C153 267 271 222 476 71' stroke='%234A6741' stroke-width='3' stroke-linecap='round' opacity='.16'/%3E%3Cpath d='M151 306C128 245 91 205 44 177' stroke='%23769A7C' stroke-width='2.4' stroke-linecap='round' opacity='.14'/%3E%3Cpath d='M245 237C236 181 264 139 311 90' stroke='%23D8CBB2' stroke-width='2.4' stroke-linecap='round' opacity='.18'/%3E%3Cpath d='M372 147C418 144 460 126 515 83' stroke='%23769A7C' stroke-width='2.4' stroke-linecap='round' opacity='.14'/%3E%3Ccircle cx='44' cy='177' r='6' fill='%23A8BFA6' opacity='.18'/%3E%3Ccircle cx='311' cy='90' r='6' fill='%23D8CBB2' opacity='.2'/%3E%3Ccircle cx='515' cy='83' r='6' fill='%23A8BFA6' opacity='.18'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg width='760' height='520' viewBox='0 0 760 520' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M94 438C212 333 335 278 594 206' stroke='%234A6741' stroke-width='3' stroke-linecap='round' opacity='.12'/%3E%3Cpath d='M199 365C183 306 151 263 104 232' stroke='%23D8CBB2' stroke-width='2.4' stroke-linecap='round' opacity='.16'/%3E%3Cpath d='M321 300C344 246 386 220 451 197' stroke='%23769A7C' stroke-width='2.4' stroke-linecap='round' opacity='.13'/%3E%3Cpath d='M442 260C497 250 548 227 618 186' stroke='%23A8BFA6' stroke-width='2.4' stroke-linecap='round' opacity='.14'/%3E%3Ccircle cx='104' cy='232' r='6' fill='%23D8CBB2' opacity='.18'/%3E%3Ccircle cx='451' cy='197' r='6' fill='%23A8BFA6' opacity='.16'/%3E%3Ccircle cx='618' cy='186' r='6' fill='%23769A7C' opacity='.12'/%3E%3C/svg%3E");
+    background-position: left -160px top -150px, right -170px bottom -150px;
+    background-repeat: no-repeat;
+    background-size: min(760px, 76vw) auto, min(760px, 78vw) auto;
+  }
+
+  .oak-bg-app {
+    @apply bg-oak-warm;
+    background-image:
+      radial-gradient(circle at 14% 8%, rgba(168, 191, 166, 0.12), transparent 24%),
+      radial-gradient(circle at 86% 92%, rgba(216, 203, 178, 0.16), transparent 30%);
+  }
+
+  .oak-bg-family {
+    @apply bg-oak-warm;
+    background-image:
+      linear-gradient(180deg, rgba(255, 248, 245, 0.62), rgba(255, 248, 245, 0.78)),
+      url('./assets/brand/backgrounds/family-hub-bg.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .oak-bg-student {
+    @apply bg-oak-warm;
+    background-image:
+      linear-gradient(180deg, rgba(255, 248, 245, 0.64), rgba(255, 248, 245, 0.8)),
+      url('./assets/brand/backgrounds/student-learning-bg.png');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
   /* Standard card — D's glassmorphism + E's warm border */
   .oak-card {
     @apply bg-white/70 backdrop-blur-sm border border-border rounded-2xl shadow-card;

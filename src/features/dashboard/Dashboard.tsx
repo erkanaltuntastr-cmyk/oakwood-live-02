@@ -3,7 +3,9 @@ import { useAppStore } from '@/state/store'
 import { Avatar } from '@/components/Avatar'
 import { useLang } from '@/lib/useLang'
 import { cn } from '@/lib/utils'
-import { BookOpen, Calendar, ChevronRight, Clock } from 'lucide-react'
+import { Calendar, ChevronRight, Clock } from 'lucide-react'
+import { OakwoodAssetIcon } from '@/components/brand/OakwoodAssetIcon'
+import type { Profile } from '@/types'
 
 const AGENDA_ITEMS = [
   { id: 1, child: 'Amelia', type: 'quiz', subject: 'Mathematics', date: 'Tomorrow' },
@@ -11,11 +13,11 @@ const AGENDA_ITEMS = [
   { id: 3, child: 'Amelia', type: 'quiz', subject: 'Science',     date: 'Monday' },
 ]
 
-function ParentBadge({ profile }: { profile: { id: string; name: string; surname?: string; initials?: string; color?: string } }) {
+function ParentBadge({ profile }: { profile: Profile }) {
   const { t } = useLang()
   return (
-    <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-border bg-card shadow-card">
-      <Avatar profile={profile} size="md" />
+    <div className="flex min-h-40 w-full min-w-56 flex-col items-center justify-center gap-3 rounded-3xl border border-border bg-card px-5 py-5 text-center shadow-card">
+      <Avatar profile={profile} size="lg" />
       <div>
         <p className="text-sm font-semibold text-foreground">{profile.name} {profile.surname}</p>
         <p className="text-xs text-muted-foreground">{t('common.parent')}</p>
@@ -37,27 +39,25 @@ function ChildCard({ childId }: { childId: string }) {
   function handleSelect() { setActiveChild(childId); navigate('/app/dashboard') }
 
   return (
-    <div className={cn('rounded-2xl border bg-card transition-all duration-150',
+    <div className={cn('rounded-3xl border bg-card transition-all duration-150',
       isActive ? 'border-primary shadow-card-md' : 'border-border hover:border-primary/30 hover:shadow-card')}>
-      <button onClick={handleSelect} className="w-full flex items-center justify-between px-4 py-3.5 group">
-        <div className="flex items-center gap-3">
-          <Avatar profile={child} size="lg" />
-          <div className="text-left">
+      <button onClick={handleSelect} className="group relative flex w-full flex-col items-center justify-center px-5 py-6 text-center">
+        <Avatar profile={child} size="xl" />
+        <div className="mt-4">
             <p className="font-semibold text-foreground">{child.name} {child.surname}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{child.yearGroup} {child.school ? `· ${child.school}` : ''}</p>
             {isActive && <span className="text-xs text-primary font-medium">{t('hub.selected')}</span>}
-          </div>
         </div>
-        <ChevronRight className={cn('w-4 h-4 transition-colors shrink-0', isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} />
+        <ChevronRight className={cn('absolute right-5 top-5 h-4 w-4 transition-colors', isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} />
       </button>
 
       {subjects.length > 0 && (
-        <div className="px-4 pb-4 border-t border-border/60">
+        <div className="border-t border-border/60 px-4 pb-5 text-center">
           <p className="text-xs text-muted-foreground mt-2.5 mb-2 uppercase tracking-wider font-medium">{t('hub.activeSubjects')}</p>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col items-center gap-1">
             {subjects.map((s) => (
               <div key={s} className="flex items-center gap-2 text-sm text-muted-foreground">
-                <BookOpen className="w-3 h-3 shrink-0" /> {s}
+                <OakwoodAssetIcon type="lessons" className="w-3.5 h-3.5 shrink-0" size={14} alt="Lessons icon" /> {s}
               </div>
             ))}
           </div>
@@ -97,14 +97,14 @@ export function Dashboard() {
       <div className="space-y-5">
         <div>
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">{t('hub.parents')}</p>
-          <div className="flex flex-wrap gap-3">
+          <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
             {parents.map((p) => <ParentBadge key={p.id} profile={p} />)}
           </div>
         </div>
         <div className="flex items-center pl-8"><div className="w-px h-6 bg-border" /></div>
         <div>
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">{t('hub.learners')}</p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]">
             {childIds.map((id) => <ChildCard key={id} childId={id} />)}
           </div>
         </div>

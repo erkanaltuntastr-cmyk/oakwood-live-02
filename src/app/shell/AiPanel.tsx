@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { X, Send, Sparkles } from 'lucide-react'
+import { X, Send } from 'lucide-react'
 import { useLang } from '@/lib/useLang'
+import { OakwoodAssetIcon, type OakwoodAssetIconType } from '@/components/brand/OakwoodAssetIcon'
 
 interface AiPanelProps { onClose: () => void }
 interface Message { role: 'user' | 'ai'; text: string }
@@ -11,9 +12,9 @@ export function AiPanel({ onClose }: AiPanelProps) {
   const [input, setInput] = useState('')
 
   const suggestions = [
-    t('ai.suggestions.quiz'),
-    t('ai.suggestions.summary'),
-    t('ai.suggestions.resource'),
+    { text: t('ai.suggestions.quiz'), icon: 'quiz' },
+    { text: t('ai.suggestions.summary'), icon: 'report' },
+    { text: t('ai.suggestions.resource'), icon: 'resources' },
   ]
 
   function send(text: string) {
@@ -23,11 +24,11 @@ export function AiPanel({ onClose }: AiPanelProps) {
   }
 
   return (
-    <aside className="w-72 shrink-0 flex flex-col border-l border-border bg-white h-full">
+    <aside className="hidden w-80 shrink-0 flex-col border-l border-border bg-white/90 backdrop-blur h-full xl:flex">
       <div className="h-16 flex items-center justify-between px-4 border-b border-border">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg bg-accent flex items-center justify-center">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <OakwoodAssetIcon type="ai" className="w-5 h-5" size={20} alt="AI icon" />
           </div>
           <span className="text-sm font-semibold text-foreground font-display italic">{t('ai.assistant')}</span>
         </div>
@@ -40,10 +41,11 @@ export function AiPanel({ onClose }: AiPanelProps) {
         {messages.length === 0 ? (
           <div className="space-y-2 pt-2">
             <p className="text-xs text-muted-foreground font-medium mb-3">Quick prompts</p>
-            {suggestions.map((s) => (
-              <button key={s} onClick={() => send(s)}
-                className="w-full text-left text-xs px-3 py-2.5 rounded-xl border border-border hover:bg-muted hover:border-primary/20 transition-colors text-muted-foreground hover:text-foreground leading-relaxed">
-                {s}
+            {suggestions.map(({ text, icon }) => (
+              <button key={text} onClick={() => send(text)}
+                className="w-full flex items-start gap-2 text-left text-xs px-3 py-2.5 rounded-xl border border-border hover:bg-muted hover:border-primary/20 transition-colors text-muted-foreground hover:text-foreground leading-relaxed">
+                <OakwoodAssetIcon type={icon as OakwoodAssetIconType} className="mt-0.5 h-4 w-4 shrink-0" size={16} alt={`${icon} icon`} />
+                <span>{text}</span>
               </button>
             ))}
           </div>

@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils'
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { useLang } from '@/lib/useLang'
 import type { Report } from '@/types'
+import { OakwoodAssetIcon } from '@/components/brand/OakwoodAssetIcon'
 
 interface QuizResultShellProps {
   score: number
@@ -21,7 +22,10 @@ export function QuizResultShell({ score, correct, wrong, onRetry, onAiSuggest, a
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-display font-semibold italic text-foreground mb-8">{t('quiz.result')}</h1>
+      <div className="mb-8 flex items-center gap-3">
+        <OakwoodAssetIcon type="quiz" className="h-9 w-9" size={36} alt="Quiz icon" />
+        <h1 className="text-2xl font-display font-semibold italic text-foreground">{t('quiz.result')}</h1>
+      </div>
       <div className="flex gap-6">
         <div className="flex-1 space-y-6">
           <div className="flex justify-center">
@@ -53,13 +57,17 @@ export function QuizResultShell({ score, correct, wrong, onRetry, onAiSuggest, a
             <button onClick={onAiSuggest} disabled={aiLoading || !!aiText}
               className="flex-1 oak-btn-primary disabled:opacity-60 flex items-center justify-center gap-2">
               {aiLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {!aiLoading && !aiText && <OakwoodAssetIcon type="ai" className="w-5 h-5" size={20} alt="AI icon" />}
               {aiText ? t('quiz.aiReceived') : t('quiz.aiSuggest')}
             </button>
           </div>
         </div>
 
         <div className="w-64 shrink-0 oak-card p-4 flex flex-col">
-          <p className="text-sm font-display font-semibold text-foreground mb-3 italic">{t('quiz.aiPanel')}</p>
+          <div className="mb-3 flex items-center gap-2">
+            <OakwoodAssetIcon type="ai" className="h-6 w-6" size={24} alt="AI icon" />
+            <p className="text-sm font-display font-semibold text-foreground italic">{t('quiz.aiPanel')}</p>
+          </div>
           {aiLoading ? (
             <div className="flex-1 flex items-center justify-center"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
           ) : aiText ? (

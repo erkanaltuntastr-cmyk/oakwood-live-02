@@ -2,20 +2,21 @@ import { useAppStore } from '@/state/store'
 import { useLang } from '@/lib/useLang'
 import type { HomeworkItem } from '@/lib/homeworkService'
 import { cn } from '@/lib/utils'
-import { BookOpen, FlaskConical, AlertTriangle, RotateCcw, CheckCircle2 } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
+import { OakwoodAssetIcon, type OakwoodAssetIconType } from '@/components/brand/OakwoodAssetIcon'
 
 const TYPE_ICONS = {
-  memory:  { icon: BookOpen,       color: 'text-violet-600', bg: 'bg-violet-50' },
-  formula: { icon: FlaskConical,   color: 'text-blue-600',   bg: 'bg-blue-50'   },
-  mistake: { icon: AlertTriangle,  color: 'text-amber-600',  bg: 'bg-amber-50'  },
-  review:  { icon: RotateCcw,      color: 'text-rose-600',   bg: 'bg-rose-50'   },
+  memory:  { icon: 'lessons', bg: 'bg-oak-green-light' },
+  formula: { icon: 'report', bg: 'bg-oak-green-light' },
+  mistake: { icon: 'quiz', bg: 'bg-oak-green-light' },
+  review:  { icon: 'homework', bg: 'bg-oak-green-light' },
 }
 
 function HomeworkCard({ item }: { item: HomeworkItem }) {
   const { completeHomework } = useAppStore()
   const { t } = useLang()
   const cfg = TYPE_ICONS[item.type]
-  const Icon = cfg.icon
+  const iconType = cfg.icon as OakwoodAssetIconType
   const done = item.status === 'completed'
 
   const typeLabel: Record<HomeworkItem['type'], string> = {
@@ -27,7 +28,7 @@ function HomeworkCard({ item }: { item: HomeworkItem }) {
     <div className={cn('oak-card p-4 transition-opacity', done && 'opacity-50')}>
       <div className="flex items-start gap-3">
         <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', cfg.bg)}>
-          <Icon className={cn('w-4 h-4', cfg.color)} />
+          <OakwoodAssetIcon type={iconType} className="w-5 h-5" size={20} alt={`${iconType} icon`} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-1">
@@ -72,12 +73,18 @@ export function Homework() {
   return (
     <div className="max-w-2xl space-y-8">
       <div>
-        <h1 className="text-2xl font-display font-semibold text-foreground italic">{t('hw.title')}</h1>
+        <div className="flex items-center gap-3">
+          <OakwoodAssetIcon type="homework" className="h-9 w-9" size={36} alt="Homework icon" />
+          <h1 className="text-2xl font-display font-semibold text-foreground italic">{t('hw.title')}</h1>
+        </div>
         <p className="text-muted-foreground mt-1 text-sm">{t('hw.subtitle')}</p>
       </div>
 
       {pending.length === 0 && (
-        <div className="oak-card p-10 text-center text-muted-foreground text-sm">{t('hw.empty')}</div>
+        <div className="oak-card p-10 text-center text-muted-foreground text-sm">
+          <OakwoodAssetIcon type="ai" className="mx-auto mb-3 h-10 w-10" size={40} alt="AI icon" />
+          {t('hw.empty')}
+        </div>
       )}
 
       {Object.entries(bySubject).map(([subject, subItems]) => (

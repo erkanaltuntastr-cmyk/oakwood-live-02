@@ -2,15 +2,19 @@ import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/state/store'
 import { Avatar } from '@/components/Avatar'
 import { useLang } from '@/lib/useLang'
-import { ArrowLeft, UserPlus } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
+import { OakwoodLogo } from '@/components/brand/OakwoodLogo'
+import { OakwoodAssetIcon } from '@/components/brand/OakwoodAssetIcon'
 import type { Profile } from '@/types'
 
 function ProfileCard({ profile, onClick }: { profile: Profile; onClick: () => void }) {
   const { t } = useLang()
   return (
     <button onClick={onClick}
-      className="group flex flex-col items-center gap-3 p-6 rounded-2xl bg-white border border-[#EAE4D9] shadow-sm hover:shadow-md hover:border-primary/40 hover:scale-[1.04] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30">
-      <Avatar profile={profile} size="xl" />
+      className="group flex min-h-[260px] flex-col items-center justify-center gap-5 rounded-3xl bg-white/85 border border-[#EAE4D9] p-8 shadow-sm hover:shadow-md hover:border-primary/40 hover:scale-[1.03] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30">
+      <div className="flex min-h-[112px] min-w-[112px] items-center justify-center">
+        <Avatar profile={profile} size="xl" />
+      </div>
       <div className="text-center">
         <p className="font-semibold text-[#2D2926] text-base leading-tight">{profile.name}</p>
         {profile.surname && <p className="text-sm text-[#7C766C] leading-tight">{profile.surname}</p>}
@@ -28,7 +32,7 @@ function EmptyState() {
   return (
     <div className="flex flex-col items-center gap-6 py-16 text-center max-w-xs mx-auto">
       <div className="w-20 h-20 rounded-3xl bg-accent flex items-center justify-center">
-        <UserPlus className="w-10 h-10 text-primary" />
+        <OakwoodAssetIcon type="family-hub" className="h-12 w-12" size={52} alt="Family hub icon" />
       </div>
       <div>
         <p className="text-lg font-semibold text-[#2D2926]">{t('auth.noProfiles')}</p>
@@ -56,12 +60,12 @@ export function ProfileSelect() {
   const hasProfiles = profiles.length > 0
 
   return (
-    <div className="min-h-screen bg-[#FFF8F5] flex flex-col">
+    <div className="min-h-screen oak-bg-family flex flex-col">
       <div className="flex items-center justify-between px-8 py-5 border-b border-[#EAE4D9]">
         <button onClick={() => navigate('/')} className="flex items-center gap-2 text-sm text-[#7C766C] hover:text-[#2D2926] transition-colors">
           <ArrowLeft className="w-4 h-4" /> {t('auth.back')}
         </button>
-        <span className="font-display font-semibold italic text-[#2D2926] text-xl">{t('app.name')}</span>
+        <OakwoodLogo imageClassName="h-9 w-9" />
         <div className="w-16" />
       </div>
 

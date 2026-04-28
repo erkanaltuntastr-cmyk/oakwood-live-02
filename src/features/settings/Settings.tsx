@@ -5,7 +5,8 @@ import { crypto } from '@/lib/crypto'
 import { useLang } from '@/lib/useLang'
 import { LANGUAGES, type Lang } from '@/lib/i18n'
 import type { Profile } from '@/types'
-import { Pencil, Trash2, Plus, X, Check, Globe } from 'lucide-react'
+import { Pencil, Trash2, Plus, X, Check } from 'lucide-react'
+import { OakwoodAssetIcon } from '@/components/brand/OakwoodAssetIcon'
 
 const YEAR_GROUPS = Array.from({ length: 13 }, (_, i) => `Year ${i + 1}`)
 
@@ -48,22 +49,20 @@ function ParentCard({ profile }: { profile: Profile }) {
 
   return (
     <div className="oak-card p-5">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <Avatar profile={profile} size="md" />
-          <div>
+      <div className="relative mb-4 flex flex-col items-center text-center">
+        <Avatar profile={profile} size="xl" />
+        <div className="mt-4">
             <p className="font-semibold text-foreground">{profile.name} {profile.surname}</p>
             <p className="text-xs text-muted-foreground">Veli</p>
-          </div>
         </div>
         <button onClick={() => setEditing(!editing)}
-          className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+          className="absolute right-0 top-0 p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
           {editing ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
         </button>
       </div>
 
       {!editing ? (
-        <div className="space-y-1.5 text-sm">
+        <div className="space-y-1.5 text-center text-sm">
           {profile.email && <p className="text-muted-foreground">{profile.email}</p>}
           {profile.postcode && <p className="text-muted-foreground">{profile.postcode}</p>}
           {profile.familyName && <p className="text-muted-foreground">Aile: {profile.familyName}</p>}
@@ -155,15 +154,13 @@ function ChildCard({ profile }: { profile: Profile }) {
 
   return (
     <div className="oak-card p-5">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <Avatar profile={profile} size="md" />
-          <div>
+      <div className="relative mb-3 flex flex-col items-center text-center">
+        <Avatar profile={profile} size="xl" />
+        <div className="mt-4">
             <p className="font-semibold text-foreground">{profile.name} {profile.surname}</p>
             <p className="text-xs text-muted-foreground">{profile.yearGroup} {profile.school ? `· ${profile.school}` : ''}</p>
-          </div>
         </div>
-        <div className="flex gap-1">
+        <div className="absolute right-0 top-0 flex gap-1">
           <button onClick={() => { setEditing(!editing); setConfirmDelete(false) }}
             className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
             {editing ? <X className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
@@ -186,7 +183,7 @@ function ChildCard({ profile }: { profile: Profile }) {
       )}
 
       {!editing ? (
-        <div className="space-y-1 text-sm text-muted-foreground">
+        <div className="space-y-1 text-center text-sm text-muted-foreground">
           {profile.notes && <p className="italic">"{profile.notes}"</p>}
           {profile.hobbies?.length ? <p>Hobiler: {profile.hobbies.join(', ')}</p> : null}
         </div>
@@ -406,14 +403,17 @@ export function Settings() {
   return (
     <div className="max-w-2xl space-y-10">
       <div>
-        <h1 className="text-2xl font-display font-semibold italic text-foreground">{t('settings.title')}</h1>
+        <div className="flex items-center gap-3">
+          <OakwoodAssetIcon type="settings" className="h-9 w-9" size={36} alt="Settings icon" />
+          <h1 className="text-2xl font-display font-semibold italic text-foreground">{t('settings.title')}</h1>
+        </div>
         <p className="text-muted-foreground text-sm mt-1">{t('settings.subtitle')}</p>
       </div>
 
       {/* Language selector */}
       <section className="oak-card p-5">
         <div className="flex items-center gap-2 mb-4">
-          <Globe className="w-4 h-4 text-muted-foreground" />
+          <OakwoodAssetIcon type="settings" className="w-5 h-5" size={20} alt="Settings icon" />
           <h2 className="text-base font-semibold text-foreground">{t('settings.language')}</h2>
         </div>
         <p className="text-xs text-muted-foreground mb-3">{t('settings.languageLabel')}</p>
@@ -436,7 +436,10 @@ export function Settings() {
       {/* Parents section */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-foreground">{t('settings.parents')}</h2>
+          <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+            <OakwoodAssetIcon type="family-hub" className="h-5 w-5" size={20} alt="Family hub icon" />
+            {t('settings.parents')}
+          </h2>
           {!addingParent && (
             <button onClick={() => setAddingParent(true)}
               className="flex items-center gap-1.5 text-sm text-primary hover:opacity-80 font-medium transition-opacity">
@@ -452,7 +455,10 @@ export function Settings() {
       {isParent && (
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-foreground">{t('settings.learners')}</h2>
+            <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+              <OakwoodAssetIcon type="pin" className="h-5 w-5" size={20} alt="Pin icon" />
+              {t('settings.learners')}
+            </h2>
             {!addingChild && (
               <button onClick={() => setAddingChild(true)}
                 className="flex items-center gap-1.5 text-sm text-primary hover:opacity-80 font-medium transition-opacity">
