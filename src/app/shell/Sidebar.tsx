@@ -63,7 +63,7 @@ export function Sidebar() {
       {/* Active child chip — parents only */}
       {isParent && (
         <button
-          onClick={() => navigate('/app/children')}
+          onClick={() => navigate(activeChild ? `/app/learner/${activeChild.id}` : '/app/children')}
           className="w-full px-4 py-4 text-left border-b border-border hover:bg-muted/40 transition-colors group"
         >
           <div className="flex w-full items-center justify-between gap-3 rounded-2xl border border-oak-beige bg-white/80 px-3 py-3 shadow-card">

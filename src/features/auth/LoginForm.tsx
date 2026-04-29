@@ -101,6 +101,14 @@ export function LoginForm() {
               <button onClick={() => navigate('/register/parent')} className="text-sm font-semibold text-primary hover:opacity-80 transition-opacity">
                 {t('welcome.register')}
               </button>
+              <div className="pt-3">
+                <button
+                  onClick={() => navigate('/admin')}
+                  className="text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Admin
+                </button>
+              </div>
             </div>
           )}
         </div>

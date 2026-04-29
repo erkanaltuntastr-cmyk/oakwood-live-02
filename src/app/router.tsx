@@ -12,7 +12,11 @@ import { useAppStore } from '@/state/store'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const activeProfileId = useAppStore((s) => s.activeProfileId)
+  const profiles = useAppStore((s) => s.profiles)
   if (!activeProfileId) return <Navigate to="/" replace />
+  if (!profiles.some((profile) => profile.id === activeProfileId)) {
+    return <Navigate to="/login" replace />
+  }
   return <>{children}</>
 }
 

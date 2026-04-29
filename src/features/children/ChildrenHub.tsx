@@ -59,7 +59,7 @@ export function ChildrenHub() {
   const parent   = profiles.find((p) => p.id === activeProfileId)
   const childIds = parent?.childIds ?? []
 
-  function handleSelect(childId: string) { setActiveChild(childId); navigate('/app/dashboard') }
+  function handleSelect(childId: string) { setActiveChild(childId); navigate(`/app/learner/${childId}`) }
 
   return (
     <div className="space-y-6 max-w-2xl">

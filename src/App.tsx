@@ -1,5 +1,10 @@
 import { AppRouter } from '@/app/router'
+import { ServerPersistenceGate } from '@/app/ServerPersistenceGate'
 
 export default function App() {
-  return <AppRouter />
+  return (
+    <ServerPersistenceGate>
+      <AppRouter />
+    </ServerPersistenceGate>
+  )
 }

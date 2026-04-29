@@ -14,6 +14,7 @@ import { Messages } from '@/features/messages/Messages'
 import { QuizWizard } from '@/features/quiz/QuizWizard'
 import { QuizSession } from '@/features/quiz/QuizSession'
 import { QuizResult } from '@/features/quiz/QuizResult'
+import { LearnerProfile } from '@/features/learner/LearnerProfile'
 import { OakwoodBackground } from '@/components/brand/OakwoodBackground'
 
 
@@ -27,6 +28,7 @@ export function AppShell() {
     '/app/subjects',
     '/app/homework',
     '/app/reports',
+    '/app/learner/',
   ].some((path) => location.pathname.startsWith(path))
 
   return (
@@ -41,6 +43,8 @@ export function AppShell() {
             <Routes>
               <Route path="dashboard"              element={<Dashboard />} />
               <Route path="children"               element={<ChildrenHub />} />
+              <Route path="learner/:childId"       element={<LearnerProfile />} />
+              <Route path="learner/:childId/subject/:subjectName" element={<LearnerProfile />} />
               <Route path="quizzes"                element={<QuizWizard />} />
               <Route path="quizzes/new"            element={<QuizWizard />} />
               <Route path="quiz/session/:sessionId" element={<QuizSession />} />

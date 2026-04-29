@@ -1,6 +1,6 @@
 import type { QuizSession } from '@/types'
 
-const API_BASE = 'http://localhost:3001'
+const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/$/, '') ?? ''
 
 const FALLBACK_MESSAGES: Record<string, string> = {
   quiz: 'AI servisi şu an bağlı değil. Ayarlar\'dan API key ekleyebilir ya da yerel AI bridge kurabilirsin.',

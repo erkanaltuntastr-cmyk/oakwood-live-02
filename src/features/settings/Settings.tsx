@@ -124,7 +124,12 @@ function ChildCard({ profile }: { profile: Profile }) {
     yearGroup: profile.yearGroup ?? '',
     school: profile.school ?? '',
     dob: profile.dob ?? '',
-    notes: profile.notes ?? '',
+    className: profile.className ?? '',
+    nativeLanguage: profile.nativeLanguage ?? '',
+    learningLanguage: profile.learningLanguage ?? '',
+    foreignLanguage: profile.foreignLanguage ?? '',
+    specialInformation: profile.specialInformation ?? profile.notes ?? '',
+    externalEducationText: profile.externalEducation?.join('\n') ?? '',
     hobbies: profile.hobbies?.join(', ') ?? '',
     pin: '',
     pinConfirm: '',
@@ -142,7 +147,15 @@ function ChildCard({ profile }: { profile: Profile }) {
       yearGroup: form.yearGroup || undefined,
       school: form.school.trim() || undefined,
       dob: form.dob.trim() || undefined,
-      notes: form.notes.trim() || undefined,
+      className: form.className.trim() || undefined,
+      nativeLanguage: form.nativeLanguage.trim() || undefined,
+      learningLanguage: form.learningLanguage.trim() || undefined,
+      foreignLanguage: form.foreignLanguage.trim() || undefined,
+      specialInformation: form.specialInformation.trim() || undefined,
+      notes: form.specialInformation.trim() || undefined,
+      externalEducation: form.externalEducationText
+        ? form.externalEducationText.split('\n').map((item) => item.trim()).filter(Boolean)
+        : [],
       hobbies: form.hobbies ? form.hobbies.split(',').map((h) => h.trim()).filter(Boolean) : [],
       initials: initials || profile.initials,
     }
@@ -184,7 +197,18 @@ function ChildCard({ profile }: { profile: Profile }) {
 
       {!editing ? (
         <div className="space-y-1 text-center text-sm text-muted-foreground">
-          {profile.notes && <p className="italic">"{profile.notes}"</p>}
+          {(profile.school || profile.className) && (
+            <p>
+              {[profile.school, profile.className].filter(Boolean).join(' · ')}
+            </p>
+          )}
+          {(profile.nativeLanguage || profile.learningLanguage || profile.foreignLanguage) && (
+            <p>
+              {[profile.nativeLanguage, profile.learningLanguage, profile.foreignLanguage].filter(Boolean).join(' · ')}
+            </p>
+          )}
+          {profile.specialInformation && <p className="italic">"{profile.specialInformation}"</p>}
+          {profile.externalEducation?.length ? <p>Okul disi egitim: {profile.externalEducation.join(', ')}</p> : null}
           {profile.hobbies?.length ? <p>Hobiler: {profile.hobbies.join(', ')}</p> : null}
         </div>
       ) : (
@@ -217,8 +241,36 @@ function ChildCard({ profile }: { profile: Profile }) {
             <input className={inp} value={form.school} onChange={(e) => setForm({ ...form, school: e.target.value })} />
           </div>
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Notlar</label>
-            <textarea className={inp} rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Sinif Adi</label>
+            <input className={inp} value={form.className} onChange={(e) => setForm({ ...form, className: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Ana Dili</label>
+              <input className={inp} value={form.nativeLanguage} onChange={(e) => setForm({ ...form, nativeLanguage: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Ogrenim Dili</label>
+              <input className={inp} value={form.learningLanguage} onChange={(e) => setForm({ ...form, learningLanguage: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">1 Yabanci Dil</label>
+              <input className={inp} value={form.foreignLanguage} onChange={(e) => setForm({ ...form, foreignLanguage: e.target.value })} />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Okul Disi Egitim</label>
+            <textarea
+              className={inp}
+              rows={3}
+              value={form.externalEducationText}
+              onChange={(e) => setForm({ ...form, externalEducationText: e.target.value })}
+              placeholder="Her satira bir egitim yaz"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Ozel Bilgiler</label>
+            <textarea className={inp} rows={3} value={form.specialInformation} onChange={(e) => setForm({ ...form, specialInformation: e.target.value })} />
           </div>
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Hobiler (virgülle ayır)</label>
@@ -247,12 +299,52 @@ function ChildCard({ profile }: { profile: Profile }) {
 // ── Add child inline form ──────────────────────────────────────────────────
 function AddChildForm({ parentId, onDone }: { parentId: string; onDone: () => void }) {
   const { addProfile, updateProfile, profiles } = useAppStore()
-  const [form, setForm] = useState({ name: '', surname: '', yearGroup: '', school: '', pin: '', pinConfirm: '' })
+  const [form, setForm] = useState({
+    name: '',
+    surname: '',
+    dob: '',
+    yearGroup: '',
+    school: '',
+    className: '',
+    nativeLanguage: '',
+    learningLanguage: '',
+    foreignLanguage: '',
+    externalEducation: [''],
+    specialInformation: '',
+    pin: '',
+    pinConfirm: '',
+  })
   const [error, setError] = useState('')
+
+  function updateExternalEducation(index: number, value: string) {
+    setForm((current) => ({
+      ...current,
+      externalEducation: current.externalEducation.map((item, itemIndex) => itemIndex === index ? value : item),
+    }))
+  }
+
+  function addExternalEducationRow() {
+    setForm((current) => ({
+      ...current,
+      externalEducation: [...current.externalEducation, ''],
+    }))
+  }
+
+  function removeExternalEducationRow(index: number) {
+    setForm((current) => ({
+      ...current,
+      externalEducation: current.externalEducation.filter((_, itemIndex) => itemIndex !== index),
+    }))
+  }
 
   function save() {
     if (!form.name.trim()) { setError('Ad zorunlu'); return }
+    if (!form.dob.trim()) { setError('Dogum tarihi zorunlu'); return }
     if (!form.yearGroup) { setError('Yıl grubu zorunlu'); return }
+    if (!form.school.trim()) { setError('Okul adi zorunlu'); return }
+    if (!form.nativeLanguage.trim()) { setError('Ana dili zorunlu'); return }
+    if (!form.learningLanguage.trim()) { setError('Ogrenim dili zorunlu'); return }
+    if (!form.foreignLanguage.trim()) { setError('Yabanci dil zorunlu'); return }
     if (form.pin.length !== 4) { setError('PIN 4 haneli olmalı'); return }
     if (form.pin !== form.pinConfirm) { setError("PIN'ler eşleşmiyor"); return }
 
@@ -266,8 +358,16 @@ function AddChildForm({ parentId, onDone }: { parentId: string; onDone: () => vo
       initials,
       color: getColor(id),
       pinHash: form.pin,
+      dob: form.dob.trim(),
       yearGroup: form.yearGroup,
-      school: form.school.trim() || undefined,
+      school: form.school.trim(),
+      className: form.className.trim() || undefined,
+      nativeLanguage: form.nativeLanguage.trim() || undefined,
+      learningLanguage: form.learningLanguage.trim() || undefined,
+      foreignLanguage: form.foreignLanguage.trim() || undefined,
+      externalEducation: form.externalEducation.map((item) => item.trim()).filter(Boolean),
+      specialInformation: form.specialInformation.trim() || undefined,
+      notes: form.specialInformation.trim() || undefined,
       createdAt: new Date().toISOString(),
     })
     // link to parent
@@ -292,16 +392,65 @@ function AddChildForm({ parentId, onDone }: { parentId: string; onDone: () => vo
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Dogum Tarihi *</label>
+            <input className={inp} placeholder="GG/AA/YYYY" value={form.dob} onChange={(e) => setForm({ ...form, dob: e.target.value })} />
+          </div>
+          <div>
             <label className="text-xs font-medium text-muted-foreground mb-1 block">Yıl Grubu *</label>
             <select className={inp} value={form.yearGroup} onChange={(e) => setForm({ ...form, yearGroup: e.target.value })}>
               <option value="">Seç...</option>
               {YEAR_GROUPS.map((y) => <option key={y} value={y}>{y}</option>)}
             </select>
           </div>
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Okul *</label>
+          <input className={inp} value={form.school} onChange={(e) => setForm({ ...form, school: e.target.value })} />
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Sinif Adi</label>
+          <input className={inp} value={form.className} onChange={(e) => setForm({ ...form, className: e.target.value })} />
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">Okul</label>
-            <input className={inp} value={form.school} onChange={(e) => setForm({ ...form, school: e.target.value })} />
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Ana Dili *</label>
+            <input className={inp} value={form.nativeLanguage} onChange={(e) => setForm({ ...form, nativeLanguage: e.target.value })} />
           </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Ogrenim Dili *</label>
+            <input className={inp} value={form.learningLanguage} onChange={(e) => setForm({ ...form, learningLanguage: e.target.value })} />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">1 Yabanci Dil *</label>
+            <input className={inp} value={form.foreignLanguage} onChange={(e) => setForm({ ...form, foreignLanguage: e.target.value })} />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-medium text-muted-foreground">Okul Disi Egitim</label>
+            <button type="button" onClick={addExternalEducationRow} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border text-primary hover:bg-accent/40 transition-colors">
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+          {form.externalEducation.map((item, index) => (
+            <div key={`settings-child-${index}`} className="flex gap-2">
+              <input
+                className={inp}
+                value={item}
+                onChange={(e) => updateExternalEducation(index, e.target.value)}
+                placeholder="Orn. Yuzme, piyano, coding club"
+              />
+              {form.externalEducation.length > 1 && (
+                <button type="button" onClick={() => removeExternalEducationRow(index)} className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Ozel Bilgiler</label>
+          <textarea className={inp} rows={3} value={form.specialInformation} onChange={(e) => setForm({ ...form, specialInformation: e.target.value })} />
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">PIN *</label>

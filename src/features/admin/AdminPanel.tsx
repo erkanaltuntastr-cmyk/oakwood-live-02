@@ -40,6 +40,18 @@ function RequestsTab() {
             </div>
             <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Bekliyor</span>
           </div>
+          {req.role === 'child' && (
+            <div className="mb-4 space-y-1 text-xs text-muted-foreground">
+              {req.dob && <p>Dogum tarihi: <span className="text-foreground">{req.dob}</span></p>}
+              {req.school && <p>Okul: <span className="text-foreground">{req.school}</span></p>}
+              {req.className && <p>Sinif adi: <span className="text-foreground">{req.className}</span></p>}
+              {req.nativeLanguage && <p>Ana dili: <span className="text-foreground">{req.nativeLanguage}</span></p>}
+              {req.learningLanguage && <p>Ogrenim dili: <span className="text-foreground">{req.learningLanguage}</span></p>}
+              {req.foreignLanguage && <p>1 yabanci dil: <span className="text-foreground">{req.foreignLanguage}</span></p>}
+              {req.externalEducation?.length ? <p>Okul disi egitim: <span className="text-foreground">{req.externalEducation.join(', ')}</span></p> : null}
+              {req.specialInformation && <p>Ozel bilgiler: <span className="text-foreground">{req.specialInformation}</span></p>}
+            </div>
+          )}
           <div className="flex gap-2">
             <button onClick={() => reviewRequest(req.id, 'rejected')}
               className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-xl border border-destructive/30 text-destructive text-sm font-medium hover:bg-destructive/5 transition-colors">

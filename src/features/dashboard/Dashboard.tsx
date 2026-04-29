@@ -36,7 +36,7 @@ function ChildCard({ childId }: { childId: string }) {
   const subjects = child.subjects?.filter((s) => s.active).map((s) => s.name) ?? []
   const isActive = childId === activeChildId
 
-  function handleSelect() { setActiveChild(childId); navigate('/app/dashboard') }
+  function handleSelect() { setActiveChild(childId); navigate(`/app/learner/${childId}`) }
 
   return (
     <div className={cn('rounded-3xl border bg-card transition-all duration-150',

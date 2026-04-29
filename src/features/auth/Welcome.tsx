@@ -1,39 +1,19 @@
-import type { ReactElement } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Mail, MapPin } from 'lucide-react'
 import { useAppStore } from '@/state/store'
 import { useLang } from '@/lib/useLang'
 import { LANGUAGES, type Lang } from '@/lib/i18n'
 import { OakwoodLogo } from '@/components/brand/OakwoodLogo'
-import {
-  AIIcon,
-  FamilyHubIcon,
-  HomeworkIcon,
-  LessonsIcon,
-  MessagesIcon,
-  ParentFemaleIcon,
-  ParentMaleIcon,
-  PinIcon,
-  QuizIcon,
-  ReportIcon,
-  ResourcesIcon,
-  SettingsIcon,
-  StudentPrimaryIcon,
-  StudentSecondaryIcon,
-  StudentYear7Icon,
-  type OakwoodIconProps,
-} from '@/components/brand/OakwoodIcons'
+import { OakwoodAssetIcon, type OakwoodAssetIconType } from '@/components/brand/OakwoodAssetIcon'
 import { cn } from '@/lib/utils'
 
-type IconComponent = (props: OakwoodIconProps) => ReactElement
-
-const featureIcons: IconComponent[] = [
-  FamilyHubIcon,
-  LessonsIcon,
-  QuizIcon,
-  ReportIcon,
-  AIIcon,
-  PinIcon,
+const featureIcons: OakwoodAssetIconType[] = [
+  'family-hub',
+  'lessons',
+  'quiz',
+  'report',
+  'ai',
+  'pin',
 ]
 
 export function Welcome() {
@@ -46,11 +26,11 @@ export function Welcome() {
     { href: '#privacy', label: t('welcome.navSecurity') },
     { href: '#contact', label: t('welcome.navContact') },
   ]
-  const trustNotes = [
-    { icon: PinIcon, text: t('welcome.trustLocal') },
-    { icon: FamilyHubIcon, text: t('welcome.trustPin') },
-    { icon: LessonsIcon, text: t('welcome.trustCurriculum') },
-    { icon: AIIcon, text: t('welcome.trustAI') },
+  const trustNotes: Array<{ icon: OakwoodAssetIconType; text: string }> = [
+    { icon: 'pin', text: t('welcome.trustLocal') },
+    { icon: 'family-hub', text: t('welcome.trustPin') },
+    { icon: 'lessons', text: t('welcome.trustCurriculum') },
+    { icon: 'ai', text: t('welcome.trustAI') },
   ]
   const features = [
     { title: t('welcome.featureFamilyHubTitle'), text: t('welcome.featureFamilyHubText') },
@@ -110,7 +90,7 @@ export function Welcome() {
       >
         <div className="max-w-3xl">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-oak-beige bg-white/70 px-4 py-2 text-sm font-semibold text-oak-green shadow-card backdrop-blur">
-            <AIIcon className="h-4 w-4" size={16} />
+            <OakwoodAssetIcon type="ai" className="h-4 w-4" size={16} alt="AI icon" />
             {t('welcome.badge')}
           </div>
 
@@ -148,8 +128,8 @@ export function Welcome() {
           </div>
 
           <div className="mt-8 grid max-w-2xl gap-3 sm:grid-cols-2">
-            {trustNotes.map(({ icon: Icon, text }) => (
-              <TrustNote key={text} icon={Icon} text={text} />
+            {trustNotes.map(({ icon, text }) => (
+              <TrustNote key={text} icon={icon} text={text} />
             ))}
           </div>
         </div>
@@ -219,20 +199,20 @@ export function Welcome() {
   )
 }
 
-function TrustNote({ icon: Icon, text }: { icon: IconComponent; text: string }) {
+function TrustNote({ icon, text }: { icon: OakwoodAssetIconType; text: string }) {
   return (
     <div className="flex items-center gap-2 rounded-2xl border border-oak-beige bg-white/65 px-4 py-3 text-sm font-medium text-[#5F5951] shadow-card backdrop-blur">
-      <Icon className="h-4 w-4 text-oak-green" size={18} strokeWidth={2} />
+      <OakwoodAssetIcon type={icon} className="h-4 w-4" size={18} alt={`${icon} icon`} />
       <span>{text}</span>
     </div>
   )
 }
 
-function FeatureCard({ icon: Icon, title, text }: { icon: IconComponent; title: string; text: string }) {
+function FeatureCard({ icon, title, text }: { icon: OakwoodAssetIconType; title: string; text: string }) {
   return (
     <article className="group flex min-h-64 flex-col items-center rounded-[1.5rem] border border-oak-beige bg-white/70 p-6 text-center shadow-[0_8px_30px_rgba(74,103,65,0.06)] backdrop-blur transition hover:-translate-y-0.5 hover:bg-white">
       <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-3xl border border-oak-beige bg-white text-oak-green shadow-card">
-        <Icon className="h-12 w-12" size={48} strokeWidth={1.75} />
+        <OakwoodAssetIcon type={icon} className="h-12 w-12" size={48} alt={`${icon} icon`} />
       </div>
       <h3 className="font-display text-xl font-semibold text-oak-text">{title}</h3>
       <p className="mt-3 text-sm leading-6 text-oak-muted">{text}</p>
@@ -243,23 +223,23 @@ function FeatureCard({ icon: Icon, title, text }: { icon: IconComponent; title: 
 function CoreIconSystem() {
   const { t } = useLang()
   const icons = [
-    { icon: FamilyHubIcon, label: t('nav.familyHub') },
-    { icon: LessonsIcon, label: t('nav.subjects') },
-    { icon: QuizIcon, label: t('nav.quizzes') },
-    { icon: HomeworkIcon, label: t('nav.homework') },
-    { icon: ReportIcon, label: t('nav.reports') },
-    { icon: AIIcon, label: t('ai.assistant') },
-    { icon: ResourcesIcon, label: t('welcome.iconResources') },
-    { icon: MessagesIcon, label: t('nav.messages') },
-    { icon: SettingsIcon, label: t('nav.settings') },
-    { icon: PinIcon, label: t('auth.pin') },
+    { icon: 'family-hub', label: t('nav.familyHub') },
+    { icon: 'lessons', label: t('nav.subjects') },
+    { icon: 'quiz', label: t('nav.quizzes') },
+    { icon: 'homework', label: t('nav.homework') },
+    { icon: 'report', label: t('nav.reports') },
+    { icon: 'ai', label: t('ai.assistant') },
+    { icon: 'resources', label: t('welcome.iconResources') },
+    { icon: 'messages', label: t('nav.messages') },
+    { icon: 'settings', label: t('nav.settings') },
+    { icon: 'pin', label: t('auth.pin') },
   ]
 
   return (
     <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-      {icons.map(({ icon: Icon, label }) => (
+      {icons.map(({ icon, label }) => (
         <div key={label} className="flex min-h-32 flex-col items-center justify-center rounded-3xl border border-oak-beige bg-white/65 px-4 py-5 text-center shadow-card backdrop-blur">
-          <Icon className="h-14 w-14 text-oak-green" size={56} strokeWidth={1.7} />
+          <OakwoodAssetIcon type={icon as OakwoodAssetIconType} className="h-14 w-14" size={56} alt={`${icon} icon`} />
           <p className="mt-3 text-xs font-semibold text-oak-muted">{label}</p>
         </div>
       ))}
@@ -286,14 +266,14 @@ function ProductPreviewCard() {
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <LearnerCard
-            icon={StudentPrimaryIcon}
+            icon="student-primary"
             name={t('welcome.previewLearnerOne')}
             score="82%"
             subject={t('welcome.previewSubjectOne')}
             year={t('welcome.previewYearOne')}
           />
           <LearnerCard
-            icon={StudentYear7Icon}
+            icon="student-year7"
             name={t('welcome.previewLearnerTwo')}
             score="76%"
             subject={t('welcome.previewSubjectTwo')}
@@ -310,7 +290,7 @@ function ProductPreviewCard() {
         <div className="mt-5 rounded-3xl border border-oak-beige bg-oak-beige-light p-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-oak-green shadow-card">
-              <AIIcon className="h-5 w-5" size={22} />
+              <OakwoodAssetIcon type="ai" className="h-5 w-5" size={22} alt="AI icon" />
             </div>
             <div>
               <p className="text-sm font-bold text-oak-text">{t('welcome.previewAITitle')}</p>
@@ -325,9 +305,9 @@ function ProductPreviewCard() {
             <p className="text-xs text-oak-muted">{t('welcome.previewFlowCount')}</p>
           </div>
           <div className="divide-y divide-oak-beige">
-            <TaskRow icon={ReportIcon} status={t('welcome.previewTaskReportStatus')} title={t('welcome.previewTaskReport')} />
-            <TaskRow icon={HomeworkIcon} status={t('welcome.previewTaskHomeworkStatus')} title={t('welcome.previewTaskHomework')} />
-            <TaskRow icon={AIIcon} status={t('welcome.previewTaskPlanStatus')} title={t('welcome.previewTaskPlan')} />
+            <TaskRow icon="report" status={t('welcome.previewTaskReportStatus')} title={t('welcome.previewTaskReport')} />
+            <TaskRow icon="homework" status={t('welcome.previewTaskHomeworkStatus')} title={t('welcome.previewTaskHomework')} />
+            <TaskRow icon="ai" status={t('welcome.previewTaskPlanStatus')} title={t('welcome.previewTaskPlan')} />
           </div>
         </div>
       </div>
@@ -338,16 +318,16 @@ function ProductPreviewCard() {
 function RolePreviewStrip() {
   const { t } = useLang()
   const roles = [
-    { icon: ParentMaleIcon, label: t('common.parent') },
-    { icon: ParentFemaleIcon, label: t('common.guardian') },
-    { icon: StudentSecondaryIcon, label: t('common.student') },
+    { icon: 'parent-male', label: t('common.parent') },
+    { icon: 'parent-female', label: t('common.guardian') },
+    { icon: 'student-secondary', label: t('common.student') },
   ]
 
   return (
     <div className="mt-5 grid gap-3 sm:grid-cols-3">
-      {roles.map(({ icon: Icon, label }) => (
+      {roles.map(({ icon, label }) => (
         <div key={label} className="flex min-h-24 flex-col items-center justify-center rounded-3xl border border-oak-beige bg-white/75 px-3 py-4 text-center shadow-card">
-          <Icon className="h-14 w-14 text-oak-green" size={56} strokeWidth={1.7} />
+          <OakwoodAssetIcon type={icon as OakwoodAssetIconType} className="h-14 w-14" size={56} alt={`${icon} icon`} />
           <p className="mt-2 text-xs font-semibold text-oak-muted">{label}</p>
         </div>
       ))}
@@ -356,13 +336,13 @@ function RolePreviewStrip() {
 }
 
 function LearnerCard({
-  icon: Icon,
+  icon,
   name,
   year,
   subject,
   score,
 }: {
-  icon: IconComponent
+  icon: OakwoodAssetIconType
   name: string
   year: string
   subject: string
@@ -374,7 +354,7 @@ function LearnerCard({
     <div className="flex flex-col items-center rounded-3xl border border-oak-beige bg-white p-5 text-center shadow-card">
       <div className="flex flex-col items-center gap-2">
         <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-3xl border border-oak-beige bg-white/90 text-oak-green shadow-card">
-          <Icon className="h-[4.5rem] w-[4.5rem]" size={72} strokeWidth={1.7} />
+          <OakwoodAssetIcon type={icon} className="h-[4.5rem] w-[4.5rem]" size={72} alt={`${icon} icon`} />
         </div>
         <div>
           <p className="font-bold text-oak-text">{name}</p>
@@ -402,12 +382,12 @@ function Metric({ label, value }: { label: string; value: string }) {
   )
 }
 
-function TaskRow({ icon: Icon = QuizIcon, title, status }: { icon?: IconComponent; title: string; status: string }) {
+function TaskRow({ icon = 'quiz', title, status }: { icon?: OakwoodAssetIconType; title: string; status: string }) {
   return (
     <div className="flex items-center justify-between gap-4 px-5 py-3">
       <div className="flex min-w-0 items-center gap-3">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-oak-green-light text-oak-green">
-          <Icon className="h-5 w-5" size={20} />
+          <OakwoodAssetIcon type={icon} className="h-5 w-5" size={20} alt={`${icon} icon`} />
         </span>
         <p className="text-sm font-medium text-oak-text">{title}</p>
       </div>

@@ -47,6 +47,10 @@ function hasMaleGender(gender?: string) {
   return /male|man|boy|erkek/i.test(gender ?? '')
 }
 
+function isEce(profile: AvatarProps['profile']) {
+  return profile.role === 'child' && /^ece$/i.test(profile.name?.trim() ?? '')
+}
+
 function useFirstVisualVariant(id: string) {
   let hash = 0
   for (const c of id) hash = (hash * 31 + c.charCodeAt(0)) & 0xffffffff
@@ -62,6 +66,7 @@ function getProfileIconType(profile: AvatarProps['profile']): OakwoodAssetIconTy
 
   if (profile.role === 'child') {
     const year = getYearNumber(profile.yearGroup) ?? 0
+    if (isEce(profile) && year >= 7) return 'student-year7'
     if (year >= 8 || hasMaleGender(profile.gender)) return 'student-secondary'
     if (year >= 7 || hasFemaleGender(profile.gender)) return 'student-year7'
     return 'student-primary'

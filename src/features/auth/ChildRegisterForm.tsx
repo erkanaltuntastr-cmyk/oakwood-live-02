@@ -1,22 +1,31 @@
 import { useState, useRef, useEffect } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Plus, X } from 'lucide-react'
 import { searchSchools } from '@/lib/schoolSearch'
+import type { ChildRegistrationFormDraft } from '@/types'
 
-interface FormData {
+export interface ChildRegistrationData {
   name: string
   surname: string
   dob: string
   gender: string
   school: string
   yearGroup: string
-  notes: string
+  className: string
+  nativeLanguage: string
+  learningLanguage: string
+  foreignLanguage: string
+  externalEducation: string[]
+  specialInformation: string
   pinHash: string
-  legalConsent: boolean
 }
 
+interface FormData extends ChildRegistrationFormDraft {}
+
 interface ChildRegisterFormProps {
-  onSubmit: (data: Omit<FormData, 'legalConsent'>) => void
+  onSubmit: (data: ChildRegistrationData) => void
   onCancel: () => void
+  draft?: ChildRegistrationFormDraft | null
+  onDraftChange?: (draft: ChildRegistrationFormDraft) => void
 }
 
 const inp = 'w-full px-3 py-2.5 text-sm border border-border rounded-xl bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 transition-colors'
@@ -112,13 +121,16 @@ function SchoolInput({ value, onChange }: { value: string; onChange: (v: string)
 }
 
 // ── Main form ──────────────────────────────────────────────────────────────
-export function ChildRegisterForm({ onSubmit, onCancel }: ChildRegisterFormProps) {
-  const [form, setForm] = useState<FormData>({
-    name: '', surname: '', dob: '', gender: '',
-    school: '', yearGroup: '', notes: '',
-    pinHash: '', legalConsent: false,
-  })
-  const [pinConfirm, setPinConfirm] = useState('')
+const EMPTY_FORM: FormData = {
+  name: '', surname: '', dob: '', gender: '',
+  school: '', yearGroup: '', className: '',
+  nativeLanguage: '', learningLanguage: '', foreignLanguage: '',
+  externalEducation: [''], specialInformation: '',
+  pinHash: '', pinConfirm: '', legalConsent: false,
+}
+
+export function ChildRegisterForm({ onSubmit, onCancel, draft, onDraftChange }: ChildRegisterFormProps) {
+  const [form, setForm] = useState<FormData>(draft ?? EMPTY_FORM)
   const [showPin, setShowPin] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof FormData | 'pinConfirm', string>>>({})
 
@@ -127,23 +139,64 @@ export function ChildRegisterForm({ onSubmit, onCancel }: ChildRegisterFormProps
     setErrors((e) => ({ ...e, [key]: undefined }))
   }
 
+  useEffect(() => {
+    onDraftChange?.(form)
+  }, [form, onDraftChange])
+
   function validate(): boolean {
     const e: typeof errors = {}
     if (!form.name.trim() || form.name.trim().length < 2) e.name = 'Ad zorunlu (min 2 karakter)'
+    if (!form.dob.trim()) e.dob = 'Dogum tarihi zorunlu'
+    if (!form.school.trim()) e.school = 'Okul adi zorunlu'
     if (!form.yearGroup) e.yearGroup = 'Sınıf zorunlu'
+    if (!form.nativeLanguage.trim()) e.nativeLanguage = 'Ana dili zorunlu'
+    if (!form.learningLanguage.trim()) e.learningLanguage = 'Ogrenim dili zorunlu'
+    if (!form.foreignLanguage.trim()) e.foreignLanguage = 'Yabanci dil zorunlu'
     if (form.dob && !/^\d{2}\/\d{2}\/\d{4}$/.test(form.dob)) e.dob = 'GG/AA/YYYY formatında gir'
     if (form.pinHash.length !== 4) e.pinHash = 'PIN 4 haneli olmalı'
-    if (form.pinHash !== pinConfirm) e.pinConfirm = "PIN'ler eşleşmiyor"
+    if (form.pinHash !== form.pinConfirm) e.pinConfirm = "PIN'ler eşleşmiyor"
     if (!form.legalConsent) e.legalConsent = 'Yasal koşulları kabul etmelisin'
     setErrors(e)
     return Object.keys(e).length === 0
+  }
+
+  function updateExternalEducation(index: number, value: string) {
+    setForm((current) => ({
+      ...current,
+      externalEducation: current.externalEducation.map((item, itemIndex) => itemIndex === index ? value : item),
+    }))
+  }
+
+  function addExternalEducationRow() {
+    setForm((current) => ({
+      ...current,
+      externalEducation: [...current.externalEducation, ''],
+    }))
+  }
+
+  function removeExternalEducationRow(index: number) {
+    setForm((current) => ({
+      ...current,
+      externalEducation: current.externalEducation.filter((_, itemIndex) => itemIndex !== index),
+    }))
   }
 
   function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault()
     if (validate()) {
       const { legalConsent, ...data } = form
-      onSubmit({ ...data, name: data.name.trim(), surname: data.surname.trim() })
+      onSubmit({
+        ...data,
+        name: data.name.trim(),
+        surname: data.surname.trim(),
+        school: data.school.trim(),
+        className: data.className.trim(),
+        nativeLanguage: data.nativeLanguage.trim(),
+        learningLanguage: data.learningLanguage.trim(),
+        foreignLanguage: data.foreignLanguage.trim(),
+        specialInformation: data.specialInformation.trim(),
+        externalEducation: data.externalEducation.map((item) => item.trim()).filter(Boolean),
+      })
     }
   }
 
@@ -173,7 +226,7 @@ export function ChildRegisterForm({ onSubmit, onCancel }: ChildRegisterFormProps
           {/* DOB + Gender */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label text="Doğum Tarihi" optional />
+              <Label text="Doğum Tarihi" />
               <input className={errors.dob ? inpErr : inp} value={form.dob} inputMode="numeric"
                 onChange={(e) => set('dob', formatDob(e.target.value))} placeholder="GG/AA/YYYY" />
               {errors.dob && <p className="text-xs text-destructive mt-1">{errors.dob}</p>}
@@ -192,8 +245,9 @@ export function ChildRegisterForm({ onSubmit, onCancel }: ChildRegisterFormProps
 
           {/* School autocomplete */}
           <div>
-            <Label text="Okul" optional />
+            <Label text="Okul" />
             <SchoolInput value={form.school} onChange={(v) => set('school', v)} />
+            {errors.school && <p className="text-xs text-destructive mt-1">{errors.school}</p>}
           </div>
 
           {/* Year group */}
@@ -207,12 +261,89 @@ export function ChildRegisterForm({ onSubmit, onCancel }: ChildRegisterFormProps
             {errors.yearGroup && <p className="text-xs text-destructive mt-1">{errors.yearGroup}</p>}
           </div>
 
-          {/* Notes / AI context */}
           <div>
-            <Label text="Notlar / AI Bağlamı" optional />
-            <textarea className={inp} rows={3} value={form.notes}
-              onChange={(e) => set('notes', e.target.value)}
-              placeholder="Öğrenme stili, güçlü yönler, zorluklar... AI asistanın çocuğu daha iyi tanımasını sağlar." />
+            <Label text="Sinif Adi" optional />
+            <input className={inp} value={form.className}
+              onChange={(e) => set('className', e.target.value)}
+              placeholder="Orn. 4B / Maple Class" />
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div>
+              <Label text="Cocugun Ana Dili" />
+              <input
+                className={errors.nativeLanguage ? inpErr : inp}
+                value={form.nativeLanguage}
+                onChange={(e) => set('nativeLanguage', e.target.value)}
+                placeholder="Orn. Turkce"
+              />
+              {errors.nativeLanguage && <p className="text-xs text-destructive mt-1">{errors.nativeLanguage}</p>}
+            </div>
+            <div>
+              <Label text="Cocugun Ogrenim Dili" />
+              <input
+                className={errors.learningLanguage ? inpErr : inp}
+                value={form.learningLanguage}
+                onChange={(e) => set('learningLanguage', e.target.value)}
+                placeholder="Orn. English"
+              />
+              {errors.learningLanguage && <p className="text-xs text-destructive mt-1">{errors.learningLanguage}</p>}
+            </div>
+            <div>
+              <Label text="Ogrendigi 1 Yabanci Dil" />
+              <input
+                className={errors.foreignLanguage ? inpErr : inp}
+                value={form.foreignLanguage}
+                onChange={(e) => set('foreignLanguage', e.target.value)}
+                placeholder="Orn. Spanish"
+              />
+              {errors.foreignLanguage && <p className="text-xs text-destructive mt-1">{errors.foreignLanguage}</p>}
+            </div>
+          </div>
+
+          {/* External education */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <Label text="Okul Disi Egitim" optional />
+              <button
+                type="button"
+                onClick={addExternalEducationRow}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border text-primary hover:bg-accent/40 transition-colors"
+                aria-label="Yeni egitim satiri ekle"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {form.externalEducation.map((item, index) => (
+                <div key={`external-${index}`} className="flex items-center gap-2">
+                  <input
+                    className={inp}
+                    value={item}
+                    onChange={(e) => updateExternalEducation(index, e.target.value)}
+                    placeholder="Orn. Piyano, kumon, yuzme, coding club"
+                  />
+                  {form.externalEducation.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeExternalEducationRow(index)}
+                      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      aria-label="Bu satiri sil"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Special information */}
+          <div>
+            <Label text="Ozel Bilgiler" optional />
+            <textarea className={inp} rows={4} value={form.specialInformation}
+              onChange={(e) => set('specialInformation', e.target.value)}
+              placeholder="Alerji, ogrenme notlari, hassasiyetler, destek ihtiyaclari ve bilinmesini istedigin detaylar..." />
           </div>
 
           {/* PIN */}
@@ -235,8 +366,11 @@ export function ChildRegisterForm({ onSubmit, onCancel }: ChildRegisterFormProps
               <div>
                 <Label text="PIN Tekrar" />
                 <input className={errors.pinConfirm ? inpErr : inp} type={showPin ? 'text' : 'password'}
-                  inputMode="numeric" maxLength={4} placeholder="••••" value={pinConfirm}
-                  onChange={(e) => { setPinConfirm(e.target.value.replace(/\D/g,'').slice(0,4)); setErrors((er) => ({ ...er, pinConfirm: undefined })) }} />
+                  inputMode="numeric" maxLength={4} placeholder="••••" value={form.pinConfirm}
+                  onChange={(e) => {
+                    setForm((current) => ({ ...current, pinConfirm: e.target.value.replace(/\D/g,'').slice(0,4) }))
+                    setErrors((er) => ({ ...er, pinConfirm: undefined }))
+                  }} />
                 {errors.pinConfirm && <p className="text-xs text-destructive mt-1">{errors.pinConfirm}</p>}
               </div>
             </div>

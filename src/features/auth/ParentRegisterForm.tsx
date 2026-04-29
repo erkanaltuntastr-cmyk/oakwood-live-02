@@ -1,27 +1,16 @@
 import { useState, useEffect } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useAppStore } from '@/state/store'
+import type { ParentRegistrationFormDraft } from '@/types'
 
-interface FormData {
-  name: string
-  surname: string
-  username: string
-  spaceName: string   // replaces familyName — the learning hub name
-  email: string
-  postcode: string
-  dob: string
-  gsm: string
-  profession: string
-  placeOfBirth: string
-  gender: string
-  aiBio: string
-  pinHash: string
-  legalConsent: boolean
-}
+interface FormData extends ParentRegistrationFormDraft {}
+type ParentSubmitData = Omit<FormData, 'legalConsent' | 'pinConfirm' | 'usernameTouched'>
 
 interface ParentRegisterFormProps {
-  onSubmit: (data: Omit<FormData, 'legalConsent'>) => void
+  onSubmit: (data: ParentSubmitData) => void
   onCancel: () => void
+  draft?: ParentRegistrationFormDraft | null
+  onDraftChange?: (draft: ParentRegistrationFormDraft) => void
 }
 
 const inp = 'w-full px-3 py-2.5 text-sm border border-border rounded-xl bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 transition-colors'
@@ -57,28 +46,33 @@ function suggestUsername(name: string, surname: string, existing: string[]): str
   return `${base}${Math.floor(Math.random() * 90) + 10}`
 }
 
-export function ParentRegisterForm({ onSubmit, onCancel }: ParentRegisterFormProps) {
+const EMPTY_FORM: FormData = {
+  name: '', surname: '', username: '', spaceName: '',
+  email: '', postcode: '', dob: '', gsm: '',
+  profession: '', placeOfBirth: '', gender: '',
+  aiBio: '', pinHash: '', pinConfirm: '', legalConsent: false,
+  usernameTouched: false,
+}
+
+export function ParentRegisterForm({ onSubmit, onCancel, draft, onDraftChange }: ParentRegisterFormProps) {
   const { profiles } = useAppStore()
   const existingUsernames = profiles.map((p) => p.name)
 
-  const [form, setForm] = useState<FormData>({
-    name: '', surname: '', username: '', spaceName: '',
-    email: '', postcode: '', dob: '', gsm: '',
-    profession: '', placeOfBirth: '', gender: '',
-    aiBio: '', pinHash: '', legalConsent: false,
-  })
-  const [pinConfirm, setPinConfirm] = useState('')
+  const [form, setForm] = useState<FormData>(draft ?? EMPTY_FORM)
   const [showPin, setShowPin] = useState(false)
-  const [usernameTouched, setUsernameTouched] = useState(false)
   const [errors, setErrors] = useState<Partial<Record<keyof FormData | 'pinConfirm', string>>>({})
 
   // Auto-suggest username when name/surname changes (if user hasn't edited it manually)
   useEffect(() => {
-    if (!usernameTouched && form.name) {
+    if (!form.usernameTouched && form.name) {
       const suggestion = suggestUsername(form.name, form.surname, existingUsernames)
       setForm((f) => ({ ...f, username: suggestion }))
     }
-  }, [form.name, form.surname, usernameTouched])
+  }, [form.name, form.surname, form.usernameTouched, existingUsernames])
+
+  useEffect(() => {
+    onDraftChange?.(form)
+  }, [form, onDraftChange])
 
   function set(key: keyof FormData, val: string | boolean) {
     setForm((f) => ({ ...f, [key]: val }))
@@ -92,7 +86,7 @@ export function ParentRegisterForm({ onSubmit, onCancel }: ParentRegisterFormPro
     if (!form.username.trim() || form.username.trim().length < 2) e.username = 'Username required (min 2 chars)'
     if (form.dob && !/^\d{2}\/\d{2}\/\d{4}$/.test(form.dob)) e.dob = 'Use DD/MM/YYYY'
     if (form.pinHash.length !== 4) e.pinHash = 'PIN must be 4 digits'
-    if (form.pinHash !== pinConfirm) e.pinConfirm = 'PINs do not match'
+    if (form.pinHash !== form.pinConfirm) e.pinConfirm = 'PINs do not match'
     if (!form.legalConsent) e.legalConsent = 'You must accept the terms to continue'
     setErrors(e)
     return Object.keys(e).length === 0
@@ -101,7 +95,7 @@ export function ParentRegisterForm({ onSubmit, onCancel }: ParentRegisterFormPro
   function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault()
     if (validate()) {
-      const { legalConsent, ...data } = form
+      const { legalConsent, pinConfirm, usernameTouched, ...data } = form
       onSubmit({ ...data, name: data.name.trim(), surname: data.surname.trim(), username: data.username.trim() })
     }
   }
@@ -135,9 +129,13 @@ export function ParentRegisterForm({ onSubmit, onCancel }: ParentRegisterFormPro
             <Label text="Username" />
             <div className="relative">
               <input className={errors.username ? inpErr : inp} value={form.username}
-                onChange={(e) => { setUsernameTouched(true); set('username', e.target.value.toLowerCase().replace(/\s+/g, '')) }}
+                onChange={(e) => setForm((current) => ({
+                  ...current,
+                  usernameTouched: true,
+                  username: e.target.value.toLowerCase().replace(/\s+/g, ''),
+                }))}
                 placeholder="e.g. jamie" />
-              {!usernameTouched && form.username && (
+              {!form.usernameTouched && form.username && (
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-primary bg-accent/60 px-1.5 py-0.5 rounded">Suggested</span>
               )}
             </div>
@@ -239,8 +237,11 @@ export function ParentRegisterForm({ onSubmit, onCancel }: ParentRegisterFormPro
               <div>
                 <Label text="Confirm PIN" />
                 <input className={errors.pinConfirm ? inpErr : inp} type={showPin ? 'text' : 'password'}
-                  inputMode="numeric" maxLength={4} placeholder="••••" value={pinConfirm}
-                  onChange={(e) => { setPinConfirm(e.target.value.replace(/\D/g,'').slice(0,4)); setErrors((er) => ({ ...er, pinConfirm: undefined })) }} />
+                  inputMode="numeric" maxLength={4} placeholder="••••" value={form.pinConfirm}
+                  onChange={(e) => {
+                    setForm((current) => ({ ...current, pinConfirm: e.target.value.replace(/\D/g,'').slice(0,4) }))
+                    setErrors((er) => ({ ...er, pinConfirm: undefined }))
+                  }} />
                 {errors.pinConfirm && <p className="text-xs text-destructive mt-1">{errors.pinConfirm}</p>}
               </div>
             </div>

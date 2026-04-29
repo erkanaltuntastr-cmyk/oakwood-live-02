@@ -1,18 +1,76 @@
 export type Role = 'parent' | 'child' | 'admin'
 export type RequestStatus = 'pending' | 'approved' | 'rejected'
+export type RegistrationMode = 'parent' | 'child'
+export type RegistrationStep = 'code' | 'parent' | 'child'
 
 export interface RegistrationRequest {
   id: string
   name: string
   surname?: string
   role: 'parent' | 'child'
+  familyRequestId?: string
+  dob?: string
+  gender?: string
+  school?: string
   yearGroup?: string
+  className?: string
+  nativeLanguage?: string
+  learningLanguage?: string
+  foreignLanguage?: string
+  externalEducation?: string[]
+  specialInformation?: string
   pinHash: string
   inviteCode?: string
   status: RequestStatus
   createdAt: string
   reviewedAt?: string
   reviewNote?: string
+}
+
+export interface ParentRegistrationFormDraft {
+  name: string
+  surname: string
+  username: string
+  spaceName: string
+  email: string
+  postcode: string
+  dob: string
+  gsm: string
+  profession: string
+  placeOfBirth: string
+  gender: string
+  aiBio: string
+  pinHash: string
+  pinConfirm: string
+  legalConsent: boolean
+  usernameTouched: boolean
+}
+
+export interface ChildRegistrationFormDraft {
+  name: string
+  surname: string
+  dob: string
+  gender: string
+  school: string
+  yearGroup: string
+  className: string
+  nativeLanguage: string
+  learningLanguage: string
+  foreignLanguage: string
+  externalEducation: string[]
+  specialInformation: string
+  pinHash: string
+  pinConfirm: string
+  legalConsent: boolean
+}
+
+export interface RegistrationFlowDraft {
+  mode: RegistrationMode
+  step: RegistrationStep
+  inviteCode: string
+  resolvedInviteId?: string
+  parentForm?: ParentRegistrationFormDraft
+  childForm?: ChildRegistrationFormDraft
 }
 
 export interface InviteCode {
@@ -33,6 +91,44 @@ export interface AdminMessage {
   text: string
   sentAt: string
   read: boolean
+}
+
+export type LearnerResourceType = 'text' | 'link' | 'image' | 'document'
+
+export interface LearnerResource {
+  id: string
+  subject: string
+  title: string
+  type: LearnerResourceType
+  content: string
+  createdAt: string
+  archived?: boolean
+}
+
+export interface LearnerArchiveItem {
+  id: string
+  title: string
+  category: 'resource' | 'course' | 'message' | 'note' | 'general'
+  detail?: string
+  createdAt: string
+}
+
+export interface LearnerNotebookEntry {
+  id: string
+  subject: string
+  title: string
+  body: string
+  createdAt: string
+  updatedAt?: string
+  archived?: boolean
+}
+
+export interface LearnerCalendarEvent {
+  id: string
+  title: string
+  date: string
+  note?: string
+  createdAt: string
 }
 export type QuestionType = 'multiple-choice' | 'gap-fill' | 'open-ended'
 export type Difficulty = 'Easy' | 'Medium' | 'Hard'
@@ -64,10 +160,20 @@ export interface Profile {
   aiBio?: string          // AI context / parental insights
   legalConsent?: boolean
   // child-specific
+  className?: string
   yearGroup?: string
   school?: string
+  nativeLanguage?: string
+  learningLanguage?: string
+  foreignLanguage?: string
   notes?: string
+  externalEducation?: string[]
+  specialInformation?: string
   hobbies?: string[]
+  resources?: LearnerResource[]
+  archive?: LearnerArchiveItem[]
+  notebooks?: LearnerNotebookEntry[]
+  calendarEvents?: LearnerCalendarEvent[]
   subjects?: { name: string; active: boolean }[]
   // meta
   createdAt: string

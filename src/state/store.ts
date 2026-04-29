@@ -1,6 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Profile, QuizDraft, QuizSession, RegistrationRequest, InviteCode, AdminMessage } from '@/types'
+import type {
+  Profile,
+  QuizDraft,
+  QuizSession,
+  RegistrationRequest,
+  InviteCode,
+  AdminMessage,
+  RegistrationFlowDraft,
+} from '@/types'
 import type { HomeworkItem } from '@/lib/homeworkService'
 import type { Lang } from '@/lib/i18n'
 import { DEMO_PROFILES, DEMO_MESSAGES, DEMO_THREADS } from './demoData'
@@ -26,6 +34,24 @@ export interface NoteThread {
 
 export const ADMIN_PIN = '1453'
 export const ADMIN_ID  = 'admin'
+export const ADMIN_USERNAME = 'admin'
+
+export interface PersistedAppState {
+  lang: Lang
+  profiles: Profile[]
+  activeProfileId: string | null
+  activeChildId: string | null
+  isAdminSession: boolean
+  quizDrafts: QuizDraft[]
+  quizSessions: QuizSession[]
+  homework: HomeworkItem[]
+  directMessages: DirectMessage[]
+  noteThreads: NoteThread[]
+  registrationRequests: RegistrationRequest[]
+  inviteCodes: InviteCode[]
+  adminMessages: AdminMessage[]
+  registrationDraft: RegistrationFlowDraft | null
+}
 
 interface AppState {
   lang: Lang
@@ -41,6 +67,7 @@ interface AppState {
   registrationRequests: RegistrationRequest[]
   inviteCodes: InviteCode[]
   adminMessages: AdminMessage[]
+  registrationDraft: RegistrationFlowDraft | null
 
   setLang:               (lang: Lang) => void
   setActiveProfile:      (id: string | null) => void
@@ -71,9 +98,13 @@ interface AppState {
   // Demo / reset
   loadDemo:              () => void
   resetAll:              () => void
+  setRegistrationDraft:  (draft: RegistrationFlowDraft | null) => void
+  patchRegistrationDraft:(updates: Partial<RegistrationFlowDraft>) => void
+  clearRegistrationDraft:(mode?: RegistrationFlowDraft['mode']) => void
+  replacePersistedState: (state: Partial<PersistedAppState>) => void
 }
 
-const EMPTY_STATE = {
+const EMPTY_STATE: PersistedAppState = {
   lang: 'en' as Lang,
   profiles: [] as Profile[],
   activeProfileId: null as string | null,
@@ -87,6 +118,49 @@ const EMPTY_STATE = {
   registrationRequests: [] as RegistrationRequest[],
   inviteCodes: [] as InviteCode[],
   adminMessages: [] as AdminMessage[],
+  registrationDraft: null,
+}
+
+function buildProfileFromRequest(req: RegistrationRequest): Profile {
+  return {
+    id: `u_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    role: req.role,
+    name: req.name,
+    surname: req.surname,
+    pinHash: req.pinHash,
+    dob: req.dob,
+    gender: req.gender,
+    yearGroup: req.yearGroup,
+    school: req.school,
+    className: req.className,
+    nativeLanguage: req.nativeLanguage,
+    learningLanguage: req.learningLanguage,
+    foreignLanguage: req.foreignLanguage,
+    externalEducation: req.externalEducation,
+    specialInformation: req.specialInformation,
+    notes: req.specialInformation,
+    childIds: req.role === 'parent' ? [] : undefined,
+    createdAt: new Date().toISOString(),
+  }
+}
+
+export function extractPersistedState(state: AppState): PersistedAppState {
+  return {
+    lang: state.lang,
+    profiles: state.profiles,
+    activeProfileId: state.activeProfileId,
+    activeChildId: state.activeChildId,
+    isAdminSession: state.isAdminSession,
+    quizDrafts: state.quizDrafts,
+    quizSessions: state.quizSessions,
+    homework: state.homework,
+    directMessages: state.directMessages,
+    noteThreads: state.noteThreads,
+    registrationRequests: state.registrationRequests,
+    inviteCodes: state.inviteCodes,
+    adminMessages: state.adminMessages,
+    registrationDraft: state.registrationDraft,
+  }
 }
 
 export const useAppStore = create<AppState>()(
@@ -176,21 +250,27 @@ export const useAppStore = create<AppState>()(
       approveAndAdd: (reqId) =>
         set((s) => {
           const req = s.registrationRequests.find((r) => r.id === reqId)
-          if (!req) return {}
-          const profile: Profile = {
-            id: `u_${Date.now()}`,
-            role: req.role,
-            name: req.name,
-            surname: req.surname,
-            pinHash: req.pinHash,
-            yearGroup: req.yearGroup,
-            childIds: req.role === 'parent' ? [] : undefined,
-            createdAt: new Date().toISOString(),
-          }
+          if (!req || req.status !== 'pending') return {}
+
+          const relatedRequests = req.familyRequestId
+            ? s.registrationRequests.filter((r) => r.familyRequestId === req.familyRequestId && r.status === 'pending')
+            : [req]
+
+          const createdProfiles = relatedRequests.map((request) => buildProfileFromRequest(request))
+          const childProfiles = createdProfiles.filter((profile) => profile.role === 'child')
+
+          const normalizedProfiles = createdProfiles.map((profile) =>
+            profile.role === 'parent'
+              ? { ...profile, childIds: childProfiles.map((child) => child.id) }
+              : profile
+          )
+
           return {
-            profiles: [...s.profiles, profile],
+            profiles: [...s.profiles, ...normalizedProfiles],
             registrationRequests: s.registrationRequests.map((r) =>
-              r.id === reqId ? { ...r, status: 'approved', reviewedAt: new Date().toISOString() } : r
+              relatedRequests.some((related) => related.id === r.id)
+                ? { ...r, status: 'approved', reviewedAt: new Date().toISOString() }
+                : r
             ),
           }
         }),
@@ -239,10 +319,33 @@ export const useAppStore = create<AppState>()(
           registrationRequests: [],
           inviteCodes: [],
           adminMessages: [],
+          registrationDraft: null,
         }),
 
       // Full reset
       resetAll: () => set({ ...EMPTY_STATE }),
+
+      setRegistrationDraft: (registrationDraft) => set({ registrationDraft }),
+
+      patchRegistrationDraft: (updates) =>
+        set((s) => ({
+          registrationDraft: s.registrationDraft
+            ? { ...s.registrationDraft, ...updates }
+            : null,
+        })),
+
+      clearRegistrationDraft: (mode) =>
+        set((s) => ({
+          registrationDraft: !mode || s.registrationDraft?.mode === mode
+            ? null
+            : s.registrationDraft,
+        })),
+
+      replacePersistedState: (state) =>
+        set({
+          ...EMPTY_STATE,
+          ...state,
+        }),
     }),
     { name: 'oakwood-v5' }   // v5: i18n (lang field)
   )
