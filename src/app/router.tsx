@@ -8,6 +8,7 @@ import { PostRegister } from '@/features/auth/PostRegister'
 import { AdminPin } from '@/features/admin/AdminPin'
 import { AdminPanel } from '@/features/admin/AdminPanel'
 import { AppShell } from '@/app/shell/AppShell'
+import { PrototypeIndex } from '@/features/prototype'
 import { useAppStore } from '@/state/store'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -42,6 +43,9 @@ export function AppRouter() {
         {/* Admin */}
         <Route path="/admin"               element={<AdminPin />} />
         <Route path="/admin/dashboard"     element={<AdminRoute><AdminPanel /></AdminRoute>} />
+
+        {/* Prototype Preview */}
+        <Route path="/prototype/*"         element={<PrototypeIndex />} />
 
         {/* App (authenticated) */}
         <Route path="/app/*" element={<ProtectedRoute><AppShell /></ProtectedRoute>} />
